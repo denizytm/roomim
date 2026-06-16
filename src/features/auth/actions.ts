@@ -46,7 +46,7 @@ export async function registerAction(
     };
   }
 
-  const { error } = await supabase.auth.signUp({
+  const { data, error } = await supabase.auth.signUp({
     email,
     password,
     options: {
@@ -57,6 +57,12 @@ export async function registerAction(
 
   if (error) {
     return { error: error.message };
+  }
+
+  // If e-mail confirmation is disabled, signUp returns an active session —
+  // skip the "check your email" screen and go straight to onboarding.
+  if (data.session) {
+    redirect("/onboarding");
   }
 
   redirect(`/verify?email=${encodeURIComponent(email)}`);
@@ -96,6 +102,37 @@ export async function loginAction(
     .maybeSingle();
 
   redirect(profile?.onboarding_completed ? "/listings" : "/onboarding");
+}
+
+// --- GEÇİCİ: test için demo hesabı girişi. İş bitince bu action + buton kaldırılacak. ---
+const DEMO_EMAIL = "demo@metu.edu.tr";
+const DEMO_PASSWORD = "demodemo123";
+
+export async function demoLoginAction(): Promise<AuthState> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+    error,
+  } = await supabase.auth.signInWithPassword({
+    email: DEMO_EMAIL,
+    password: DEMO_PASSWORD,
+  });
+  if (error || !user) {
+    return {
+      error:
+        "Demo hesabı henüz oluşturulmamış. Supabase'de demo@metu.edu.tr kullanıcısını oluştur.",
+    };
+  }
+
+  // Her demo girişi "ilk kez" gibi başlasın: önceki yanıtları sil, onboarding'i
+  // sıfırla ve uyum sorularına yönlendir.
+  await supabase.from("compatibility_answers").delete().eq("user_id", user.id);
+  await supabase
+    .from("profiles")
+    .update({ onboarding_completed: false })
+    .eq("id", user.id);
+
+  redirect("/onboarding");
 }
 
 export async function signOut() {
