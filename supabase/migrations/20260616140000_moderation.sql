@@ -63,6 +63,7 @@ begin
     raise exception 'forbidden';
   end if;
   update public.profiles set banned = true where id = target;
+  update public.listings set status = 'closed' where owner_id = target;
   insert into public.banned_emails (email)
     select lower(email) from auth.users where id = target
     on conflict do nothing;

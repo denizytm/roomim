@@ -37,10 +37,28 @@ export async function dismissReportAction(formData: FormData) {
   revalidatePath("/moderation");
 }
 
-// Admin: kullanıcıyı banla (RLS + RPC admin kontrolü yapar)
+// Admin: kullanıcıyı banla. Süre: preset (saat) veya customHours; 0/boş = süresiz.
 export async function banUserAction(formData: FormData) {
   const target = formData.get("userId") as string;
+  const preset = Number(formData.get("preset"));
+  const custom = Number(formData.get("customHours"));
+  const hours =
+    Number.isFinite(custom) && custom > 0
+      ? custom
+      : Number.isFinite(preset)
+        ? preset
+        : 0;
+  const until = hours > 0 ? new Date(Date.now() + hours * 3_600_000).toISOString() : null;
+
   const { supabase } = await requireUser();
-  await supabase.rpc("ban_user", { target });
+  await supabase.rpc("ban_user", { target, until });
+  revalidatePath("/moderation");
+}
+
+// Admin: banı kaldır
+export async function unbanUserAction(formData: FormData) {
+  const target = formData.get("userId") as string;
+  const { supabase } = await requireUser();
+  await supabase.rpc("unban_user", { target });
   revalidatePath("/moderation");
 }

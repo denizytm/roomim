@@ -49,6 +49,7 @@ export type Database = {
           member_no: number | null;
           is_admin: boolean;
           banned: boolean;
+          banned_until: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -66,6 +67,7 @@ export type Database = {
           member_no?: number | null;
           is_admin?: boolean;
           banned?: boolean;
+          banned_until?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -276,6 +278,10 @@ export type Database = {
         Returns: { user_id: string; score: number }[];
       };
       ban_user: {
+        Args: { target: string; until?: string | null };
+        Returns: undefined;
+      };
+      unban_user: {
         Args: { target: string };
         Returns: undefined;
       };

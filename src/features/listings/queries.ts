@@ -1,3 +1,4 @@
+import { isEffectivelyBanned } from "@/lib/ban";
 import { createClient } from "@/lib/supabase/server";
 import type { Listing, ListingPhoto, Profile } from "@/lib/types/database.types";
 import type { ListingFilters } from "@/lib/validation/listing";
@@ -67,16 +68,20 @@ export async function getListings(filters: ListingFilters): Promise<ListingWithP
   const withPhotos = await attachPhotos(supabase, data ?? []);
   const withScores = await attachScores(supabase, withPhotos);
 
-  // Arama önceliği: yüksek puanlı ilan sahipleri önde (eşitlikte yeni ilan önde)
+  // Sahip bilgisi: banlı sahiplerin ilanlarını gizle + arama önceliği (puan)
   const ownerIds = [...new Set(withScores.map((l) => l.owner_id))];
-  const { data: pts } = await supabase
+  const { data: owners } = await supabase
     .from("profiles")
-    .select("id, points")
+    .select("id, points, banned, banned_until")
     .in("id", ownerIds);
-  const ptMap = new Map((pts ?? []).map((p) => [p.id, p.points]));
-  return [...withScores].sort(
-    (a, b) => (ptMap.get(b.owner_id) ?? 0) - (ptMap.get(a.owner_id) ?? 0),
+  const ptMap = new Map((owners ?? []).map((p) => [p.id, p.points]));
+  const bannedSet = new Set(
+    (owners ?? []).filter((p) => isEffectivelyBanned(p)).map((p) => p.id),
   );
+
+  return withScores
+    .filter((l) => !bannedSet.has(l.owner_id))
+    .sort((a, b) => (ptMap.get(b.owner_id) ?? 0) - (ptMap.get(a.owner_id) ?? 0));
 }
 
 export async function getMyListings(ownerId: string): Promise<ListingWithPhotos[]> {
@@ -107,9 +112,14 @@ export async function getListingById(id: string): Promise<ListingDetail | null> 
 
   const { data: owner } = await supabase
     .from("profiles")
-    .select("id, full_name, avatar_url, department, graduation_date, university_id")
+    .select(
+      "id, full_name, avatar_url, department, graduation_date, university_id, banned, banned_until",
+    )
     .eq("id", listing.owner_id)
     .maybeSingle();
+
+  // Etkin banlı kullanıcının ilanı görüntülenemez.
+  if (owner && isEffectivelyBanned(owner)) return null;
 
   let ownerUniversity: string | null = null;
   if (owner?.university_id) {

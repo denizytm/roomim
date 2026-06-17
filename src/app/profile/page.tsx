@@ -4,6 +4,7 @@ import { BadgeCheck, Gift, Sparkles, Star } from "lucide-react";
 import { ProfileForm } from "@/features/profile/profile-form";
 import { ReferralCodes } from "@/features/profile/referral-codes";
 import { requireUser } from "@/lib/auth";
+import { isEffectivelyBanned } from "@/lib/ban";
 import { computeBadges } from "@/lib/loyalty";
 import { cn } from "@/lib/utils";
 
@@ -19,7 +20,7 @@ export default async function ProfilePage() {
     .maybeSingle();
 
   if (!profile) redirect("/login");
-  if (profile.banned) redirect("/banned");
+  if (isEffectivelyBanned(profile)) redirect("/banned");
 
   let universityName: string | null = null;
   if (profile.university_id) {

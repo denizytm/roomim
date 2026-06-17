@@ -11,6 +11,26 @@ export type ReportItem = {
   listingTitle: string | null;
 };
 
+export type BannedUser = {
+  id: string;
+  name: string;
+  bannedUntil: string | null;
+};
+
+export async function getBannedUsers(): Promise<BannedUser[]> {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("profiles")
+    .select("id, full_name, banned_until")
+    .eq("banned", true)
+    .order("full_name", { ascending: true });
+  return (data ?? []).map((p) => ({
+    id: p.id,
+    name: p.full_name ?? "Kullanıcı",
+    bannedUntil: p.banned_until,
+  }));
+}
+
 // Sadece adminler için (RLS reports select'i is_admin() ile sınırlar).
 export async function getOpenReports(): Promise<ReportItem[]> {
   const supabase = await createClient();
