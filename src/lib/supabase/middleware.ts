@@ -3,7 +3,13 @@ import { NextResponse, type NextRequest } from "next/server";
 
 import type { Database } from "@/lib/types/database.types";
 
-const PROTECTED_PREFIXES = ["/profile", "/onboarding", "/listings/new", "/listings/mine"];
+const PROTECTED_PREFIXES = [
+  "/profile",
+  "/onboarding",
+  "/listings/new",
+  "/listings/mine",
+  "/messages",
+];
 const AUTH_PREFIXES = ["/login", "/register"];
 
 // Refreshes the auth session on every request and guards protected routes.

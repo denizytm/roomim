@@ -1,7 +1,8 @@
 import Link from "next/link";
-import { LogOut, Plus, UserRound } from "lucide-react";
+import { LogOut, MessageCircle, Plus, UserRound } from "lucide-react";
 
 import { Logo } from "@/components/layout/logo";
+import { RealtimeNotifications } from "@/components/realtime-notifications";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { signOut } from "@/features/auth/actions";
@@ -35,7 +36,9 @@ export async function SiteHeader() {
   }
 
   return (
-    <header className="sticky top-0 z-40 w-full border-b border-border/70 bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <>
+      {user && <RealtimeNotifications meId={user.id} />}
+      <header className="sticky top-0 z-40 w-full border-b border-border/70 bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-4">
         <div className="flex items-center gap-6">
           <Logo />
@@ -61,6 +64,14 @@ export async function SiteHeader() {
                 className="hidden sm:inline-flex"
               >
                 İlanlarım
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon-sm"
+                render={<Link href="/messages" />}
+                aria-label="Mesajlar"
+              >
+                <MessageCircle />
               </Button>
               <Link
                 href="/profile"
@@ -94,6 +105,7 @@ export async function SiteHeader() {
           )}
         </div>
       </div>
-    </header>
+      </header>
+    </>
   );
 }

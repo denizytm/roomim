@@ -1,18 +1,20 @@
 "use client";
 
 import { Coffee, MessageCircle, ShieldCheck } from "lucide-react";
-import { toast } from "sonner";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import { startConversationAction } from "@/features/messages/actions";
 
 export function ContactCard({
+  listingId,
   ownerName,
   ownerAvatar,
   university,
   department,
   isOwner,
 }: {
+  listingId: string;
   ownerName: string;
   ownerAvatar: string | null;
   university: string | null;
@@ -40,15 +42,18 @@ export function ContactCard({
         </div>
       </div>
 
-      <Button
-        className="mt-4 w-full"
-        disabled={isOwner}
-        onClick={() =>
-          toast.info("Mesajlaşma çok yakında — eşleşme sonrası platform içinde açılacak.")
-        }
-      >
-        <MessageCircle /> {isOwner ? "Bu senin ilanın" : "İletişime geç"}
-      </Button>
+      {isOwner ? (
+        <Button className="mt-4 w-full" disabled>
+          <MessageCircle /> Bu senin ilanın
+        </Button>
+      ) : (
+        <form action={startConversationAction} className="mt-4">
+          <input type="hidden" name="listingId" value={listingId} />
+          <Button type="submit" className="w-full">
+            <MessageCircle /> İletişime geç
+          </Button>
+        </form>
+      )}
 
       <div className="mt-4 space-y-2 text-xs text-muted-foreground">
         <p className="flex items-center gap-1.5">

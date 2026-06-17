@@ -133,6 +133,7 @@ export default async function ListingDetailPage({
 
         <aside className="lg:sticky lg:top-20 lg:self-start">
           <ContactCard
+            listingId={listing.id}
             ownerName={listing.owner?.full_name ?? "Ev sahibi"}
             ownerAvatar={publicImageUrl("avatars", listing.owner?.avatar_url)}
             university={listing.ownerUniversity}

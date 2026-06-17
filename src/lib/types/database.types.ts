@@ -11,6 +11,7 @@ export type Json =
 
 export type UserRole = "host" | "seeker";
 export type ListingStatus = "active" | "passive" | "matched" | "closed";
+export type ConversationStatus = "pending" | "accepted" | "declined";
 
 export type Database = {
   public: {
@@ -173,6 +174,46 @@ export type Database = {
         Update: Partial<Database["public"]["Tables"]["listing_photos"]["Insert"]>;
         Relationships: [];
       };
+      conversations: {
+        Row: {
+          id: string;
+          listing_id: string;
+          seeker_id: string;
+          host_id: string;
+          status: ConversationStatus;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          listing_id: string;
+          seeker_id: string;
+          host_id: string;
+          status?: ConversationStatus;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["conversations"]["Insert"]>;
+        Relationships: [];
+      };
+      messages: {
+        Row: {
+          id: string;
+          conversation_id: string;
+          sender_id: string;
+          body: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          conversation_id: string;
+          sender_id: string;
+          body: string;
+          created_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["messages"]["Insert"]>;
+        Relationships: [];
+      };
     };
     Views: Record<never, never>;
     Functions: {
@@ -184,6 +225,7 @@ export type Database = {
     Enums: {
       user_role: UserRole;
       listing_status: ListingStatus;
+      conversation_status: ConversationStatus;
     };
     CompositeTypes: Record<never, never>;
   };
@@ -198,5 +240,7 @@ export type CompatibilityQuestion = Tables["compatibility_questions"]["Row"];
 export type CompatibilityAnswer = Tables["compatibility_answers"]["Row"];
 export type Listing = Tables["listings"]["Row"];
 export type ListingPhoto = Tables["listing_photos"]["Row"];
+export type Conversation = Tables["conversations"]["Row"];
+export type Message = Tables["messages"]["Row"];
 
 export type QuestionOption = { value: number; label: string };
