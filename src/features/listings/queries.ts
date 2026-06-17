@@ -53,6 +53,7 @@ export async function getListings(filters: ListingFilters): Promise<ListingWithP
     .from("listings")
     .select("*")
     .eq("status", "active")
+    .gt("expires_at", new Date().toISOString()) // süresi dolanları gizle
     .order("created_at", { ascending: false });
 
   if (filters.city) query = query.eq("city", filters.city);

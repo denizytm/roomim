@@ -34,6 +34,7 @@ export async function getProfile(): Promise<Profile | null> {
 export async function requireOnboardedProfile(): Promise<Profile> {
   const profile = await getProfile();
   if (!profile) redirect("/login");
+  if (profile.banned) redirect("/banned");
   if (!profile.onboarding_completed) redirect("/onboarding");
   return profile;
 }

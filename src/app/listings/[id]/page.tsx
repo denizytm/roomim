@@ -14,6 +14,9 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { CompatibilityBadge } from "@/features/listings/compatibility-badge";
 import { ContactCard } from "@/features/listings/contact-card";
+import { ListingMap } from "@/features/listings/listing-map";
+import { ReportButton } from "@/features/moderation/report-button";
+import { coordsFor } from "@/lib/data/coords";
 import { PhotoGallery } from "@/features/listings/photo-gallery";
 import { getListingById } from "@/features/listings/queries";
 import { requireOnboardedProfile } from "@/lib/auth";
@@ -38,6 +41,7 @@ export default async function ListingDetailPage({
     .map((p) => publicImageUrl(LISTING_BUCKET, p.storage_path))
     .filter((u): u is string => Boolean(u));
   const features = (listing.features as string[]) ?? [];
+  const coords = coordsFor(listing.city, listing.district);
 
   const facts = [
     { icon: BedDouble, label: `${listing.room_count} kiralık oda` },
@@ -128,6 +132,21 @@ export default async function ListingDetailPage({
                 </div>
               </div>
             )}
+
+            {coords && (
+              <div className="mt-8">
+                <h2 className="font-semibold">Konum</h2>
+                <p className="mt-1 mb-3 text-sm text-muted-foreground">
+                  {listing.neighborhood ? `${listing.neighborhood}, ` : ""}
+                  {listing.district}, {listing.city} — yaklaşık bölge (tam adres paylaşılmaz)
+                </p>
+                <ListingMap
+                  lng={coords[0]}
+                  lat={coords[1]}
+                  label={`${listing.district}, ${listing.city} haritası`}
+                />
+              </div>
+            )}
           </div>
         </div>
 
@@ -140,6 +159,12 @@ export default async function ListingDetailPage({
             department={listing.owner?.department ?? null}
             isOwner={listing.owner?.id === profile.id}
           />
+
+          {listing.owner && listing.owner.id !== profile.id && (
+            <div className="mt-3 flex justify-end">
+              <ReportButton listingId={listing.id} reportedUserId={listing.owner.id} />
+            </div>
+          )}
         </aside>
       </div>
     </div>

@@ -1,11 +1,21 @@
 "use client";
 
 import { useEffect, useRef, useState, useTransition } from "react";
-import { Check, Coffee, Loader2, MapPin, Send, ShieldAlert, X } from "lucide-react";
+import {
+  Check,
+  Coffee,
+  Loader2,
+  MapPin,
+  PartyPopper,
+  Send,
+  ShieldAlert,
+  X,
+} from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { closeListingAction } from "@/features/listings/actions";
 import { setConversationStatusAction } from "@/features/messages/actions";
 import { createClient } from "@/lib/supabase/client";
 import type { ConversationStatus, Message } from "@/lib/types/database.types";
@@ -18,6 +28,8 @@ type Props = {
   status: ConversationStatus;
   otherName: string;
   district: string | null;
+  listingId: string | null;
+  listingStatus: string | null;
   initialMessages: Message[];
 };
 
@@ -28,6 +40,8 @@ export function Chat({
   status,
   otherName,
   district,
+  listingId,
+  listingStatus,
   initialMessages,
 }: Props) {
   const [messages, setMessages] = useState<Message[]>(initialMessages);
@@ -176,6 +190,23 @@ export function Chat({
   // --- Accepted: sohbet ---
   return (
     <div className="flex h-[60vh] flex-col rounded-2xl border border-border bg-card">
+      {/* Eşleşince ev sahibine ilanı kapatma önerisi */}
+      {isHost && listingId && listingStatus !== "closed" && (
+        <form
+          action={closeListingAction}
+          className="flex items-center justify-between gap-2 border-b border-border bg-primary/5 px-4 py-2.5 text-sm"
+        >
+          <span className="flex items-center gap-2">
+            <PartyPopper className="size-4 text-primary" /> Anlaştıysanız ilanı
+            kapatabilirsin.
+          </span>
+          <input type="hidden" name="id" value={listingId} />
+          <Button type="submit" size="xs" variant="outline">
+            İlanı kapat
+          </Button>
+        </form>
+      )}
+
       {/* Kafe önerisi */}
       <div className="flex items-start gap-2 border-b border-border bg-accent/40 px-4 py-3 text-sm">
         <Coffee className="mt-0.5 size-4 shrink-0 text-primary" />

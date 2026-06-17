@@ -47,6 +47,8 @@ export type Database = {
           onboarding_completed: boolean;
           points: number;
           member_no: number | null;
+          is_admin: boolean;
+          banned: boolean;
           created_at: string;
           updated_at: string;
         };
@@ -62,6 +64,8 @@ export type Database = {
           onboarding_completed?: boolean;
           points?: number;
           member_no?: number | null;
+          is_admin?: boolean;
+          banned?: boolean;
           created_at?: string;
           updated_at?: string;
         };
@@ -236,12 +240,44 @@ export type Database = {
         Update: Partial<Database["public"]["Tables"]["referral_codes"]["Insert"]>;
         Relationships: [];
       };
+      reports: {
+        Row: {
+          id: string;
+          reporter_id: string;
+          reported_user_id: string | null;
+          listing_id: string | null;
+          reason: string;
+          status: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          reporter_id: string;
+          reported_user_id?: string | null;
+          listing_id?: string | null;
+          reason: string;
+          status?: string;
+          created_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["reports"]["Insert"]>;
+        Relationships: [];
+      };
+      banned_emails: {
+        Row: { email: string; created_at: string };
+        Insert: { email: string; created_at?: string };
+        Update: Partial<Database["public"]["Tables"]["banned_emails"]["Insert"]>;
+        Relationships: [];
+      };
     };
     Views: Record<never, never>;
     Functions: {
       compatibility_scores: {
         Args: { other_users: string[] };
         Returns: { user_id: string; score: number }[];
+      };
+      ban_user: {
+        Args: { target: string };
+        Returns: undefined;
       };
     };
     Enums: {
@@ -265,5 +301,6 @@ export type ListingPhoto = Tables["listing_photos"]["Row"];
 export type Conversation = Tables["conversations"]["Row"];
 export type Message = Tables["messages"]["Row"];
 export type ReferralCode = Tables["referral_codes"]["Row"];
+export type Report = Tables["reports"]["Row"];
 
 export type QuestionOption = { value: number; label: string };

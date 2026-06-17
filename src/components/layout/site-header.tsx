@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { LogOut, MessageCircle, Plus, UserRound } from "lucide-react";
+import { LogOut, MessageCircle, Plus, ShieldCheck, UserRound } from "lucide-react";
 
 import { Logo } from "@/components/layout/logo";
 import { RealtimeNotifications } from "@/components/realtime-notifications";
@@ -24,12 +24,18 @@ export async function SiteHeader() {
     data: { user },
   } = await supabase.auth.getUser();
 
-  let profile: { full_name: string | null; avatar_url: string | null; role: string | null } | null =
-    null;
+  let profile:
+    | {
+        full_name: string | null;
+        avatar_url: string | null;
+        role: string | null;
+        is_admin: boolean;
+      }
+    | null = null;
   if (user) {
     const { data } = await supabase
       .from("profiles")
-      .select("full_name, avatar_url, role")
+      .select("full_name, avatar_url, role, is_admin")
       .eq("id", user.id)
       .maybeSingle();
     profile = data;
@@ -73,6 +79,16 @@ export async function SiteHeader() {
               >
                 <MessageCircle />
               </Button>
+              {profile?.is_admin && (
+                <Button
+                  variant="ghost"
+                  size="icon-sm"
+                  render={<Link href="/moderation" />}
+                  aria-label="Moderasyon"
+                >
+                  <ShieldCheck />
+                </Button>
+              )}
               <Link
                 href="/profile"
                 className="flex items-center gap-2 rounded-full p-0.5 pr-2 transition-colors hover:bg-muted"

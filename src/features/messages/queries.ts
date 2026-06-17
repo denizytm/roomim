@@ -67,7 +67,7 @@ export async function getConversationsForUser(
 
 export type ConversationDetail = {
   conversation: Conversation;
-  listing: { id: string; title: string; city: string; district: string } | null;
+  listing: { id: string; title: string; city: string; district: string; status: string } | null;
   isHost: boolean;
   other: { id: string; full_name: string | null; avatar_url: string | null } | null;
   messages: Message[];
@@ -92,7 +92,7 @@ export async function getConversation(
   const [{ data: listing }, { data: other }, { data: messages }] = await Promise.all([
     supabase
       .from("listings")
-      .select("id, title, city, district")
+      .select("id, title, city, district, status")
       .eq("id", conversation.listing_id)
       .maybeSingle(),
     supabase

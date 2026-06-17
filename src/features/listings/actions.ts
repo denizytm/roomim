@@ -95,6 +95,32 @@ export async function createListingAction(
   redirect(`/listings/${listing.id}`);
 }
 
+// İlanı 30 gün uzat (yenile) — süresi dolmuş/pasif ilanı tekrar aktif eder.
+export async function extendListingAction(formData: FormData) {
+  const id = formData.get("id") as string;
+  const { supabase, user } = await requireUser();
+  const expiresAt = new Date(Date.now() + 30 * 86_400_000).toISOString();
+  await supabase
+    .from("listings")
+    .update({ expires_at: expiresAt, status: "active" })
+    .eq("id", id)
+    .eq("owner_id", user.id);
+  revalidatePath("/listings/mine");
+}
+
+// Eşleşme sonrası / elle ilanı kapat.
+export async function closeListingAction(formData: FormData) {
+  const id = formData.get("id") as string;
+  const { supabase, user } = await requireUser();
+  await supabase
+    .from("listings")
+    .update({ status: "closed" })
+    .eq("id", id)
+    .eq("owner_id", user.id);
+  revalidatePath("/listings/mine");
+  revalidatePath(`/listings/${id}`);
+}
+
 // Used on "İlanlarım" to pause/reactivate/close a listing.
 export async function setListingStatusAction(formData: FormData) {
   const id = formData.get("id") as string;

@@ -19,6 +19,7 @@ export default async function ProfilePage() {
     .maybeSingle();
 
   if (!profile) redirect("/login");
+  if (profile.banned) redirect("/banned");
 
   let universityName: string | null = null;
   if (profile.university_id) {

@@ -4,12 +4,13 @@ import { Plus } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { setListingStatusAction } from "@/features/listings/actions";
+import { extendListingAction, setListingStatusAction } from "@/features/listings/actions";
 import { getMyListings } from "@/features/listings/queries";
 import { requireOnboardedProfile } from "@/lib/auth";
 import type { ListingStatus } from "@/lib/types/database.types";
 import { formatRent } from "@/lib/format";
 import { LISTING_BUCKET, publicImageUrl } from "@/lib/supabase/storage";
+import { cn } from "@/lib/utils";
 
 const STATUS_LABEL: Record<ListingStatus, string> = {
   active: "Yayında",
@@ -89,6 +90,22 @@ export default async function MyListingsPage() {
                   <p className="mt-1 text-sm text-muted-foreground">
                     {listing.district}, {listing.city} · {formatRent(listing.monthly_rent)}/ay
                   </p>
+                  {(() => {
+                    const days = Math.ceil(
+                      (new Date(listing.expires_at).getTime() - Date.now()) / 86_400_000,
+                    );
+                    const expired = days <= 0;
+                    return (
+                      <p
+                        className={cn(
+                          "mt-1 text-xs",
+                          expired ? "text-destructive" : "text-muted-foreground",
+                        )}
+                      >
+                        {expired ? "Süresi doldu" : `${days} gün kaldı`}
+                      </p>
+                    );
+                  })()}
 
                   <div className="mt-auto flex flex-wrap gap-2 pt-3">
                     {listing.status === "active" && (
@@ -102,6 +119,14 @@ export default async function MyListingsPage() {
                     )}
                     {listing.status === "closed" && (
                       <StatusButton id={listing.id} status="active" label="Yeniden yayınla" />
+                    )}
+                    {listing.status !== "closed" && (
+                      <form action={extendListingAction}>
+                        <input type="hidden" name="id" value={listing.id} />
+                        <Button type="submit" variant="outline" size="sm">
+                          30 gün uzat
+                        </Button>
+                      </form>
                     )}
                   </div>
                 </div>
