@@ -4,15 +4,10 @@ import { AlarmClock, Plus } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { NativeSelect } from "@/components/ui/native-select";
-import {
-  closeListingAction,
-  extendListingAction,
-  setListingStatusAction,
-} from "@/features/listings/actions";
+import { extendListingAction, setListingStatusAction } from "@/features/listings/actions";
+import { CloseListingButton } from "@/features/listings/close-listing-button";
 import { getMyListings } from "@/features/listings/queries";
 import { requireOnboardedProfile } from "@/lib/auth";
-import { CLOSE_REASONS } from "@/lib/constants";
 import type { ListingStatus } from "@/lib/types/database.types";
 import { daysLeft, formatRent } from "@/lib/format";
 import { LISTING_BUCKET, publicImageUrl } from "@/lib/supabase/storage";
@@ -39,24 +34,6 @@ function StatusButton({ id, status, label }: { id: string; status: ListingStatus
       <input type="hidden" name="status" value={status} />
       <Button type="submit" variant="outline" size="sm">
         {label}
-      </Button>
-    </form>
-  );
-}
-
-function CloseForm({ id }: { id: string }) {
-  return (
-    <form action={closeListingAction} className="flex items-center gap-1.5">
-      <input type="hidden" name="id" value={id} />
-      <NativeSelect name="reason" defaultValue="matched" className="h-8 w-40 text-xs">
-        {CLOSE_REASONS.map((r) => (
-          <option key={r.value} value={r.value}>
-            {r.label}
-          </option>
-        ))}
-      </NativeSelect>
-      <Button type="submit" variant="outline" size="sm">
-        Kapat
       </Button>
     </form>
   );
@@ -138,7 +115,7 @@ export default async function MyListingsPage() {
                   )}
 
                   <div className="mt-auto flex flex-wrap items-center gap-2 pt-3">
-                    {open && <CloseForm id={listing.id} />}
+                    {open && <CloseListingButton id={listing.id} />}
                     {listing.status === "active" && (
                       <StatusButton id={listing.id} status="passive" label="Pasife al" />
                     )}

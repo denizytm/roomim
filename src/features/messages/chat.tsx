@@ -201,6 +201,7 @@ export function Chat({
             kapatabilirsin.
           </span>
           <input type="hidden" name="id" value={listingId} />
+          <input type="hidden" name="reason" value="matched" />
           <Button type="submit" size="xs" variant="outline">
             İlanı kapat
           </Button>
