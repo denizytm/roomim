@@ -1,4 +1,4 @@
-import type { UserRole } from "@/lib/types/database.types";
+import type { UserRole } from "./types/database.types";
 
 export const ROLE_LABELS: Record<UserRole, string> = {
   host: "Ev Sunan",

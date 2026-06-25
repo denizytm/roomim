@@ -1,0 +1,23 @@
+{
+  "name": "@hoomies/shared",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./types": "./src/types/database.types.ts",
+    "./types/database.types": "./src/types/database.types.ts",
+    "./constants": "./src/constants.ts",
+    "./format": "./src/format.ts",
+    "./ban": "./src/ban.ts",
+    "./loyalty": "./src/loyalty.ts",
+    "./data/locations": "./src/data/locations.ts",
+    "./data/coords": "./src/data/coords.ts",
+    "./validation/auth": "./src/validation/auth.ts",
+    "./validation/profile": "./src/validation/profile.ts",
+    "./validation/listing": "./src/validation/listing.ts"
+  },
+  "dependencies": {
+    "zod": "^4.4.3"
+  }
+}

@@ -5,7 +5,7 @@ import {
   MAX_LISTING_PHOTOS,
   MIN_LISTING_PHOTOS,
   PHOTO_CATEGORIES,
-} from "@/lib/constants";
+} from "../constants";
 
 const featureValues = LISTING_FEATURES.map((f) => f.value) as [string, ...string[]];
 

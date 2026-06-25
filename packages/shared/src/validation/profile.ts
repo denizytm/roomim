@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { roleSchema } from "@/lib/validation/auth";
+import { roleSchema } from "./auth";
 
 export const profileFormSchema = z.object({
   fullName: z.string().trim().min(2, "Adın en az 2 karakter olmalı").max(80),
