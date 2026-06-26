@@ -50,6 +50,7 @@ export type Database = {
           is_admin: boolean;
           banned: boolean;
           banned_until: string | null;
+          expo_push_token: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -68,6 +69,7 @@ export type Database = {
           is_admin?: boolean;
           banned?: boolean;
           banned_until?: string | null;
+          expo_push_token?: string | null;
           created_at?: string;
           updated_at?: string;
         };

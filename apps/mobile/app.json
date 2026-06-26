@@ -27,6 +27,7 @@
     },
     "plugins": [
       "expo-router",
+      "expo-notifications",
       [
         "expo-image-picker",
         { "photosPermission": "İlan ve profil fotoğrafları için galeriye erişim gerekir." }

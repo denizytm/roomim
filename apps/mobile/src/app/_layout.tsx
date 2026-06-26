@@ -1,13 +1,30 @@
-import { Stack } from "expo-router";
+import * as Notifications from "expo-notifications";
+import { Stack, router, type Href } from "expo-router";
+import { useEffect } from "react";
 import { ActivityIndicator, View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
 import { SessionProvider, useSession } from "@/lib/auth-context";
+import { registerForPush } from "@/lib/push";
 import { colors } from "@/lib/theme";
 
 function RootNavigator() {
   const { session, isLoading } = useSession();
+
+  // Oturum açılınca push token'ı kaydet
+  useEffect(() => {
+    if (session) registerForPush(session.user.id);
+  }, [session?.user.id]);
+
+  // Bildirime tıklayınca ilgili sohbete git
+  useEffect(() => {
+    const sub = Notifications.addNotificationResponseReceivedListener((resp) => {
+      const convId = resp.notification.request.content.data?.conversationId as string | undefined;
+      if (convId) router.push(`/chat/${convId}` as Href);
+    });
+    return () => sub.remove();
+  }, []);
 
   if (isLoading) {
     return (
