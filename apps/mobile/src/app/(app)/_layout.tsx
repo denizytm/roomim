@@ -28,6 +28,10 @@ export default function AppLayout() {
           name="chat/[id]"
           options={{ headerShown: true, title: "Sohbet", headerTintColor: colors.text }}
         />
+        <Stack.Screen
+          name="listing-new"
+          options={{ headerShown: true, title: "Yeni ilan", headerTintColor: colors.text }}
+        />
       </Stack.Protected>
     </Stack>
   );

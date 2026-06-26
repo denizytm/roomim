@@ -2,10 +2,12 @@ import { isEffectivelyBanned } from "@hoomies/shared/ban";
 import type {
   CompatibilityCategory,
   CompatibilityQuestion,
+  ListingStatus,
   Profile,
   QuestionOption,
   UserRole,
 } from "@hoomies/shared/types/database.types";
+import type { ListingInput } from "@hoomies/shared/validation/listing";
 
 import { supabase } from "@/lib/supabase";
 import { publicImageUrl } from "@/lib/storage";
@@ -327,4 +329,123 @@ export async function getProfileFull(
     university = u?.name ?? null;
   }
   return { profile: profile ?? null, university };
+}
+
+// --- İlan oluşturma / yönetimi ---
+
+export type MyListing = {
+  id: string;
+  title: string;
+  monthly_rent: number;
+  city: string;
+  district: string;
+  status: ListingStatus;
+  expires_at: string;
+  coverUrl: string | null;
+};
+
+export async function getMyListings(userId: string): Promise<MyListing[]> {
+  const { data } = await supabase
+    .from("listings")
+    .select("*")
+    .eq("owner_id", userId)
+    .order("created_at", { ascending: false });
+  const ids = (data ?? []).map((l) => l.id);
+  const { data: photos } = ids.length
+    ? await supabase
+        .from("listing_photos")
+        .select("listing_id, storage_path, position")
+        .in("listing_id", ids)
+        .order("position", { ascending: true })
+    : { data: [] as { listing_id: string; storage_path: string; position: number }[] };
+  const cover = new Map<string, string>();
+  for (const p of photos ?? []) if (!cover.has(p.listing_id)) cover.set(p.listing_id, p.storage_path);
+
+  return (data ?? []).map((l) => ({
+    id: l.id,
+    title: l.title,
+    monthly_rent: l.monthly_rent,
+    city: l.city,
+    district: l.district,
+    status: l.status,
+    expires_at: l.expires_at,
+    coverUrl: publicImageUrl("listing-photos", cover.get(l.id)),
+  }));
+}
+
+export async function createListing(
+  userId: string,
+  d: ListingInput,
+  photos: { path: string; category: string }[],
+): Promise<string> {
+  const { data: listing, error } = await supabase
+    .from("listings")
+    .insert({
+      owner_id: userId,
+      title: d.title,
+      description: d.description || null,
+      monthly_rent: d.monthlyRent,
+      deposit: d.deposit ?? null,
+      dues: d.dues ?? null,
+      bills_included: d.billsIncluded,
+      capacity: d.capacity,
+      occupied: d.occupied,
+      room_count: d.totalRooms ?? 1,
+      total_rooms: d.totalRooms ?? null,
+      bathroom_count: d.bathroomCount ?? null,
+      available_from: d.availableFrom || null,
+      city: d.city,
+      district: d.district,
+      neighborhood: d.neighborhood || null,
+      pets_allowed: d.petsAllowed,
+      furnished: d.furnished,
+      gender_preference: d.genderPreference,
+      features: d.features,
+    })
+    .select("id")
+    .single();
+  if (error || !listing) throw error ?? new Error("İlan oluşturulamadı");
+
+  const rows = photos.map((p, i) => ({
+    listing_id: listing.id,
+    storage_path: p.path,
+    category: p.category,
+    position: i,
+  }));
+  const { error: pe } = await supabase.from("listing_photos").insert(rows);
+  if (pe) throw pe;
+  return listing.id;
+}
+
+export async function setListingStatus(
+  listingId: string,
+  userId: string,
+  status: ListingStatus,
+): Promise<void> {
+  await supabase.from("listings").update({ status }).eq("id", listingId).eq("owner_id", userId);
+}
+
+export async function extendListing(listingId: string, userId: string): Promise<void> {
+  const expiresAt = new Date(Date.now() + 30 * 86_400_000).toISOString();
+  await supabase
+    .from("listings")
+    .update({ expires_at: expiresAt, status: "active" })
+    .eq("id", listingId)
+    .eq("owner_id", userId);
+}
+
+// Galeriden seçilen bir görseli storage'a yükler, path döner.
+export async function uploadListingPhoto(
+  userId: string,
+  base64: string,
+  ext: string,
+): Promise<string> {
+  const { decode } = await import("base64-arraybuffer");
+  const path = `${userId}/${Date.now()}-${Math.floor(Math.random() * 1e6)}.${ext}`;
+  const contentType = ext === "png" ? "image/png" : "image/jpeg";
+  const { error } = await supabase.storage
+    .from("listing-photos")
+    .upload(path, decode(base64), { contentType });
+  if (error) throw error;
+  return path;
 }
