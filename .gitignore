@@ -7,7 +7,12 @@ node_modules/
 .next/
 out/
 .expo/
+.expo-export/
 dist/
+
+# expo prebuild (CNG) native projeleri — generated
+/apps/mobile/android/
+/apps/mobile/ios/
 
 # production
 build/
