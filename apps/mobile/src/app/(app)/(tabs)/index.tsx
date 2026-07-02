@@ -1,5 +1,7 @@
+import { Ionicons } from "@expo/vector-icons";
+import { router, type Href } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
-import { ActivityIndicator, Text, View } from "react-native";
+import { ActivityIndicator, Pressable, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { SwipeDeck } from "@/components/swipe-deck";
@@ -34,8 +36,24 @@ export default function DeckScreen() {
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.bg }} edges={["top"]}>
-      <View style={{ paddingHorizontal: 20, paddingVertical: 12 }}>
+      <View
+        style={{
+          flexDirection: "row",
+          alignItems: "center",
+          justifyContent: "space-between",
+          paddingHorizontal: 20,
+          paddingVertical: 12,
+        }}
+      >
         <Text style={{ fontSize: 22, fontWeight: "800", color: colors.primary }}>hoomies</Text>
+        <View style={{ flexDirection: "row", gap: 18 }}>
+          <Pressable onPress={() => router.push("/search" as Href)} hitSlop={8}>
+            <Ionicons name="search-outline" size={24} color={colors.text} />
+          </Pressable>
+          <Pressable onPress={() => router.push("/liked" as Href)} hitSlop={8}>
+            <Ionicons name="heart-outline" size={24} color={colors.text} />
+          </Pressable>
+        </View>
       </View>
       {cards === null ? (
         <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>

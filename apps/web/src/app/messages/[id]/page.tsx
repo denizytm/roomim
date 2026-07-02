@@ -2,10 +2,12 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Chat } from "@/features/messages/chat";
 import { CompatibilityBadge } from "@/features/listings/compatibility-badge";
 import { getConversation } from "@/features/messages/queries";
 import { requireOnboardedProfile } from "@/lib/auth";
+import { AVATAR_BUCKET, publicImageUrl } from "@/lib/supabase/storage";
 
 export const metadata = { title: "Sohbet" };
 
@@ -29,9 +31,29 @@ export default async function ConversationPage({
           >
             <ArrowLeft className="size-4" /> Mesajlar
           </Link>
-          <h1 className="truncate text-xl font-bold tracking-tight">
-            {data.other?.full_name ?? "Kullanıcı"}
-          </h1>
+          {data.other ? (
+            <Link
+              href={`/u/${data.other.id}`}
+              className="group inline-flex items-center gap-2.5"
+            >
+              <Avatar className="size-9">
+                {publicImageUrl(AVATAR_BUCKET, data.other.avatar_url) && (
+                  <AvatarImage
+                    src={publicImageUrl(AVATAR_BUCKET, data.other.avatar_url)!}
+                    alt={data.other.full_name ?? ""}
+                  />
+                )}
+                <AvatarFallback>
+                  {(data.other.full_name ?? "?").slice(0, 1).toUpperCase()}
+                </AvatarFallback>
+              </Avatar>
+              <h1 className="truncate text-xl font-bold tracking-tight group-hover:text-primary">
+                {data.other.full_name ?? "Kullanıcı"}
+              </h1>
+            </Link>
+          ) : (
+            <h1 className="truncate text-xl font-bold tracking-tight">Kullanıcı</h1>
+          )}
         </div>
         {data.listing && (
           <Link

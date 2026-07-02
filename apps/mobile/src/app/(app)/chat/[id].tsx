@@ -1,4 +1,5 @@
-import { Stack, useLocalSearchParams } from "expo-router";
+import { Image } from "expo-image";
+import { router, Stack, useLocalSearchParams, type Href } from "expo-router";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
@@ -14,6 +15,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { useSession } from "@/lib/auth-context";
+import { publicImageUrl } from "@/lib/storage";
 import {
   closeListing,
   getConversationDetail,
@@ -111,6 +113,13 @@ export default function ChatScreen() {
   if (detail.status === "pending") {
     return (
       <SafeAreaView style={{ flex: 1, backgroundColor: colors.bg }} edges={["bottom"]}>
+        <Stack.Screen
+          options={{
+            headerTitle: () => (
+              <ChatHeaderTitle id={detail.otherId} name={detail.otherName} avatar={detail.otherAvatar} />
+            ),
+          }}
+        />
         <View style={{ flex: 1, alignItems: "center", justifyContent: "center", padding: 28, gap: 12 }}>
           {detail.isHost ? (
             <>
@@ -168,7 +177,7 @@ export default function ChatScreen() {
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.bg }} edges={["bottom"]}>
       <Stack.Screen
         options={{
-          title: detail.otherName,
+          headerTitle: () => <ChatHeaderTitle id={detail.otherId} name={detail.otherName} avatar={detail.otherAvatar} />,
           headerRight:
             detail.otherAnswers.length > 0
               ? () => (
@@ -287,6 +296,40 @@ export default function ChatScreen() {
         </View>
       </KeyboardAvoidingView>
     </SafeAreaView>
+  );
+}
+
+function ChatHeaderTitle({ id, name, avatar }: { id: string; name: string; avatar: string | null }) {
+  const uri = publicImageUrl("avatars", avatar);
+  return (
+    <Pressable
+      onPress={() => router.push(`/user/${id}` as Href)}
+      style={{ flexDirection: "row", alignItems: "center", gap: 8 }}
+      hitSlop={8}
+    >
+      <View
+        style={{
+          width: 30,
+          height: 30,
+          borderRadius: 15,
+          backgroundColor: colors.surface,
+          alignItems: "center",
+          justifyContent: "center",
+          overflow: "hidden",
+        }}
+      >
+        {uri ? (
+          <Image source={{ uri }} style={{ width: 30, height: 30 }} contentFit="cover" />
+        ) : (
+          <Text style={{ color: colors.primary, fontWeight: "800", fontSize: 13 }}>
+            {name.slice(0, 1).toUpperCase()}
+          </Text>
+        )}
+      </View>
+      <Text style={{ fontSize: 17, fontWeight: "700", color: colors.text }} numberOfLines={1}>
+        {name}
+      </Text>
+    </Pressable>
   );
 }
 

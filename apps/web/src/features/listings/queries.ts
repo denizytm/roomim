@@ -123,6 +123,27 @@ export async function getMyListings(ownerId: string): Promise<ListingWithPhotos[
   return attachPhotos(supabase, data ?? []);
 }
 
+// Beğendiklerim: kullanıcının (ev arayan) ilgi gösterdiği ilanlar.
+// Web'de ilana "İletişim kur" = seeker olarak conversation oluşur.
+export async function getLikedListings(userId: string): Promise<ListingWithPhotos[]> {
+  const supabase = await createClient();
+  const { data: convs } = await supabase
+    .from("conversations")
+    .select("listing_id, created_at")
+    .eq("seeker_id", userId)
+    .order("created_at", { ascending: false });
+
+  const ids = [...new Set((convs ?? []).map((c) => c.listing_id))];
+  if (ids.length === 0) return [];
+
+  const { data } = await supabase.from("listings").select("*").in("id", ids);
+  const order = new Map(ids.map((id, i) => [id, i]));
+  const ordered = (data ?? []).sort(
+    (a, b) => (order.get(a.id) ?? 0) - (order.get(b.id) ?? 0),
+  );
+  return attachScores(supabase, await attachPhotos(supabase, ordered));
+}
+
 export type ListingDetail = ListingWithPhotos & {
   owner: Pick<Profile, "id" | "full_name" | "avatar_url" | "department" | "graduation_date"> | null;
   ownerUniversity: string | null;

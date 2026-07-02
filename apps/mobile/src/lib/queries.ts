@@ -169,12 +169,231 @@ export async function likeListing(
   if (error) throw error;
 }
 
+// --- Filtreli manuel arama ---
+
+export type SearchFilters = {
+  city?: string | null;
+  district?: string | null;
+  minRent?: number | null;
+  maxRent?: number | null;
+  minAvailable?: number | null;
+  pets?: boolean | null;
+};
+
+export type ListingCard = {
+  id: string;
+  title: string;
+  monthly_rent: number;
+  city: string;
+  district: string;
+  capacity: number;
+  occupied: number;
+  pets_allowed: boolean;
+  furnished: boolean;
+  score: number | null;
+  coverUrl: string | null;
+};
+
+async function decorateListings(rows: { id: string; owner_id: string; [k: string]: unknown }[]): Promise<ListingCard[]> {
+  if (rows.length === 0) return [];
+  const ownerIds = [...new Set(rows.map((l) => l.owner_id))];
+  const [{ data: owners }, { data: scores }, { data: photos }] = await Promise.all([
+    supabase.from("profiles").select("id, banned, banned_until").in("id", ownerIds),
+    supabase.rpc("compatibility_scores", { other_users: ownerIds }),
+    supabase
+      .from("listing_photos")
+      .select("listing_id, storage_path, position")
+      .in("listing_id", rows.map((l) => l.id))
+      .order("position", { ascending: true }),
+  ]);
+  const bannedSet = new Set((owners ?? []).filter((o) => isEffectivelyBanned(o)).map((o) => o.id));
+  const scoreMap = new Map((scores ?? []).map((s) => [s.user_id, s.score]));
+  const coverMap = new Map<string, string>();
+  for (const p of photos ?? []) if (!coverMap.has(p.listing_id)) coverMap.set(p.listing_id, p.storage_path);
+
+  return rows
+    .filter((l) => !bannedSet.has(l.owner_id))
+    .map((l) => ({
+      id: l.id,
+      title: l.title as string,
+      monthly_rent: l.monthly_rent as number,
+      city: l.city as string,
+      district: l.district as string,
+      capacity: l.capacity as number,
+      occupied: l.occupied as number,
+      pets_allowed: l.pets_allowed as boolean,
+      furnished: l.furnished as boolean,
+      score: scoreMap.get(l.owner_id) ?? null,
+      coverUrl: publicImageUrl("listing-photos", coverMap.get(l.id)),
+    }));
+}
+
+export async function searchListings(f: SearchFilters): Promise<ListingCard[]> {
+  let q = supabase
+    .from("listings")
+    .select("*")
+    .eq("status", "active")
+    .gt("expires_at", new Date().toISOString())
+    .order("created_at", { ascending: false })
+    .limit(60);
+  if (f.city) q = q.eq("city", f.city);
+  if (f.district) q = q.eq("district", f.district);
+  if (f.minRent != null) q = q.gte("monthly_rent", f.minRent);
+  if (f.maxRent != null) q = q.lte("monthly_rent", f.maxRent);
+  if (f.pets) q = q.eq("pets_allowed", true);
+
+  const { data: listings } = await q;
+  let rows = listings ?? [];
+  if (f.minAvailable != null) {
+    rows = rows.filter((l) => Math.max((l.capacity ?? 0) - (l.occupied ?? 0), 0) >= f.minAvailable!);
+  }
+  return decorateListings(rows);
+}
+
+// Beğendiklerim: ev arayanın ilgi gösterdiği (sağa kaydırdığı) ilanlar.
+export async function getLikedListings(userId: string): Promise<ListingCard[]> {
+  const { data: convs } = await supabase
+    .from("conversations")
+    .select("listing_id, created_at")
+    .eq("seeker_id", userId)
+    .order("created_at", { ascending: false });
+  const ids = [...new Set((convs ?? []).map((c) => c.listing_id))];
+  if (ids.length === 0) return [];
+  const { data: listings } = await supabase.from("listings").select("*").in("id", ids);
+  // Konuşma sırasını koru
+  const order = new Map(ids.map((id, i) => [id, i]));
+  const rows = (listings ?? []).sort(
+    (a, b) => (order.get(a.id) ?? 0) - (order.get(b.id) ?? 0),
+  );
+  return decorateListings(rows);
+}
+
+// --- İlan detayı ---
+
+export type ListingDetail = {
+  id: string;
+  title: string;
+  description: string | null;
+  monthly_rent: number;
+  deposit: number | null;
+  dues: number | null;
+  bills_included: boolean;
+  city: string;
+  district: string;
+  neighborhood: string | null;
+  capacity: number;
+  occupied: number;
+  total_rooms: number | null;
+  bathroom_count: number | null;
+  available_from: string | null;
+  furnished: boolean;
+  pets_allowed: boolean;
+  gender_preference: string;
+  features: string[];
+  status: ListingStatus;
+  photoUrls: string[];
+  owner: {
+    id: string;
+    full_name: string | null;
+    avatar_url: string | null;
+    department: string | null;
+    university: string | null;
+  } | null;
+  score: number | null;
+  isOwner: boolean;
+  conversationId: string | null;
+};
+
+export async function getListingDetail(
+  listingId: string,
+  viewerId: string,
+): Promise<ListingDetail | null> {
+  const { data: l } = await supabase
+    .from("listings")
+    .select("*")
+    .eq("id", listingId)
+    .maybeSingle();
+  if (!l) return null;
+
+  const [{ data: photos }, { data: owner }, { data: scores }, { data: conv }] =
+    await Promise.all([
+      supabase
+        .from("listing_photos")
+        .select("storage_path, position")
+        .eq("listing_id", listingId)
+        .order("position", { ascending: true }),
+      supabase
+        .from("profiles")
+        .select("id, full_name, avatar_url, department, university_id, banned, banned_until")
+        .eq("id", l.owner_id)
+        .maybeSingle(),
+      supabase.rpc("compatibility_scores", { other_users: [l.owner_id] }),
+      supabase
+        .from("conversations")
+        .select("id")
+        .eq("listing_id", listingId)
+        .eq("seeker_id", viewerId)
+        .maybeSingle(),
+    ]);
+
+  if (owner && isEffectivelyBanned(owner)) return null;
+
+  let university: string | null = null;
+  if (owner?.university_id) {
+    const { data: uni } = await supabase
+      .from("universities")
+      .select("name")
+      .eq("id", owner.university_id)
+      .maybeSingle();
+    university = uni?.name ?? null;
+  }
+
+  return {
+    id: l.id,
+    title: l.title,
+    description: l.description,
+    monthly_rent: l.monthly_rent,
+    deposit: l.deposit,
+    dues: l.dues,
+    bills_included: l.bills_included,
+    city: l.city,
+    district: l.district,
+    neighborhood: l.neighborhood,
+    capacity: l.capacity,
+    occupied: l.occupied,
+    total_rooms: l.total_rooms,
+    bathroom_count: l.bathroom_count,
+    available_from: l.available_from,
+    furnished: l.furnished,
+    pets_allowed: l.pets_allowed,
+    gender_preference: l.gender_preference,
+    features: (l.features as string[] | null) ?? [],
+    status: l.status,
+    photoUrls: (photos ?? [])
+      .map((p) => publicImageUrl("listing-photos", p.storage_path))
+      .filter((u): u is string => Boolean(u)),
+    owner: owner
+      ? {
+          id: owner.id,
+          full_name: owner.full_name,
+          avatar_url: owner.avatar_url,
+          department: owner.department,
+          university,
+        }
+      : null,
+    score: scores?.[0]?.score ?? null,
+    isOwner: l.owner_id === viewerId,
+    conversationId: conv?.id ?? null,
+  };
+}
+
 // --- Konuşmalar / sohbet ---
 
 export type ConvListItem = {
   id: string;
   status: string;
   isHost: boolean;
+  listingId: string;
   otherName: string;
   otherAvatar: string | null;
   listingTitle: string;
@@ -216,6 +435,7 @@ export async function getConversations(userId: string): Promise<ConvListItem[]> 
       id: c.id,
       status: c.status,
       isHost: c.host_id === userId,
+      listingId: c.listing_id,
       otherName: other?.full_name ?? "Kullanıcı",
       otherAvatar: other?.avatar_url ?? null,
       listingTitle: lm.get(c.listing_id) ?? "İlan",
@@ -230,7 +450,9 @@ export type ChatMessage = { id: string; sender_id: string; body: string };
 export type ChatDetail = {
   status: string;
   isHost: boolean;
+  otherId: string;
   otherName: string;
+  otherAvatar: string | null;
   listingId: string | null;
   listingStatus: string | null;
   listingTitle: string | null;
@@ -261,7 +483,7 @@ export async function getConversationDetail(
         .select("id, title, district, status")
         .eq("id", conv.listing_id)
         .maybeSingle(),
-      supabase.from("profiles").select("id, full_name").eq("id", otherId).maybeSingle(),
+      supabase.from("profiles").select("id, full_name, avatar_url").eq("id", otherId).maybeSingle(),
       supabase
         .from("messages")
         .select("id, sender_id, body, created_at")
@@ -291,7 +513,9 @@ export async function getConversationDetail(
   return {
     status: conv.status,
     isHost,
+    otherId,
     otherName: other?.full_name ?? "Kullanıcı",
+    otherAvatar: other?.avatar_url ?? null,
     listingId: listing?.id ?? null,
     listingStatus: listing?.status ?? null,
     listingTitle: listing?.title ?? null,

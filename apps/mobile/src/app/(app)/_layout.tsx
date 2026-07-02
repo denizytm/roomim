@@ -1,6 +1,7 @@
 import { Stack } from "expo-router";
 import { ActivityIndicator, View } from "react-native";
 
+import { RealtimeNotifications } from "@/components/realtime-notifications";
 import { useSession } from "@/lib/auth-context";
 import { colors } from "@/lib/theme";
 
@@ -18,8 +19,10 @@ export default function AppLayout() {
   const onboarded = profile.onboarding_completed;
 
   return (
-    <Stack screenOptions={{ headerShown: false }}>
-      <Stack.Protected guard={!onboarded}>
+    <>
+      {onboarded && <RealtimeNotifications />}
+      <Stack screenOptions={{ headerShown: false }}>
+        <Stack.Protected guard={!onboarded}>
         <Stack.Screen name="onboarding" />
       </Stack.Protected>
       <Stack.Protected guard={onboarded}>
@@ -40,7 +43,24 @@ export default function AppLayout() {
           name="support"
           options={{ headerShown: true, title: "Destek / Şikayet", headerTintColor: colors.text }}
         />
+        <Stack.Screen
+          name="user/[id]"
+          options={{ headerShown: true, title: "Profil", headerTintColor: colors.text }}
+        />
+        <Stack.Screen
+          name="listing/[id]"
+          options={{ headerShown: true, title: "İlan", headerTintColor: colors.text }}
+        />
+        <Stack.Screen
+          name="search"
+          options={{ headerShown: true, title: "İlan ara", headerTintColor: colors.text }}
+        />
+        <Stack.Screen
+          name="liked"
+          options={{ headerShown: true, title: "Beğendiklerim", headerTintColor: colors.text }}
+        />
       </Stack.Protected>
-    </Stack>
+      </Stack>
+    </>
   );
 }

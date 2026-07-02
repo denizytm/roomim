@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { LogOut, MessageCircle, Plus, ShieldCheck, UserRound } from "lucide-react";
+import { Heart, LogOut, MessageCircle, Plus, ShieldCheck, UserRound } from "lucide-react";
 
 import { Logo } from "@/components/layout/logo";
 import { RealtimeNotifications } from "@/components/realtime-notifications";
@@ -71,6 +71,16 @@ export async function SiteHeader() {
               >
                 İlanlarım
               </Button>
+              {profile?.role === "seeker" && (
+                <Button
+                  variant="ghost"
+                  size="icon-sm"
+                  render={<Link href="/liked" />}
+                  aria-label="Beğendiklerim"
+                >
+                  <Heart />
+                </Button>
+              )}
               <Button
                 variant="ghost"
                 size="icon-sm"

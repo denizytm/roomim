@@ -45,7 +45,7 @@ export default function MessagesScreen() {
         <View style={{ flex: 1, alignItems: "center", justifyContent: "center", padding: 32 }}>
           <Text style={{ fontWeight: "700", color: colors.text, fontSize: 16 }}>Henüz eşleşmen yok</Text>
           <Text style={{ color: colors.muted, textAlign: "center", marginTop: 6 }}>
-            Keşfet'te bir ilanı sağa kaydırarak ilgi göster.
+            {"Keşfet'te bir ilanı sağa kaydırarak ilgi göster."}
           </Text>
         </View>
       ) : (
@@ -91,6 +91,15 @@ export default function MessagesScreen() {
                   <Text style={{ color: colors.muted }} numberOfLines={1}>
                     {item.lastMessage ?? item.listingTitle}
                   </Text>
+                  <Pressable
+                    onPress={() => router.push(`/listing/${item.listingId}` as Href)}
+                    hitSlop={6}
+                    style={{ alignSelf: "flex-start", marginTop: 4 }}
+                  >
+                    <Text style={{ color: colors.primary, fontSize: 12, fontWeight: "700" }}>
+                      🏠 İlana git
+                    </Text>
+                  </Pressable>
                 </View>
               </Pressable>
             );
