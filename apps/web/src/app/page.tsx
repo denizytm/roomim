@@ -138,10 +138,10 @@ export default function HomePage() {
         <FadeIn>
           <div className="relative overflow-hidden rounded-3xl bg-primary px-8 py-14 text-center text-primary-foreground">
             <h2 className="text-3xl font-bold tracking-tight text-balance">
-              Kurucu üye ol, ilk 500 arasına gir.
+              Doğru ev arkadaşın bir tık uzağında.
             </h2>
             <p className="mx-auto mt-3 max-w-md text-primary-foreground/90">
-              Edu mail ile kaydol, &ldquo;Kurucu Üye&rdquo; rozetini kazan.
+              Edu mail ile kaydol, uyum skoruna göre eşleş.
             </p>
             <Button
               size="lg"

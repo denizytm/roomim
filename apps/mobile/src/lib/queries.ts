@@ -398,6 +398,16 @@ export async function createListing(
   d: ListingInput,
   photos: { path: string; category: string }[],
 ): Promise<string> {
+  // Herkes en fazla 1 aktif/açık ilan açabilir.
+  const { count } = await supabase
+    .from("listings")
+    .select("id", { count: "exact", head: true })
+    .eq("owner_id", userId)
+    .neq("status", "closed");
+  if ((count ?? 0) >= 1) {
+    throw new Error("En fazla 1 aktif ilanın olabilir. Yeni ilan için mevcut ilanını kapat.");
+  }
+
   const { data: listing, error } = await supabase
     .from("listings")
     .insert({
@@ -468,4 +478,19 @@ export async function uploadListingPhoto(
     .upload(path, decode(base64), { contentType });
   if (error) throw error;
   return path;
+}
+
+// Destek / şikayet talebi. Hedefsiz (listingId/reportedUserId yok) = genel destek.
+export async function createReport(
+  reporterId: string,
+  reason: string,
+  opts?: { listingId?: string; reportedUserId?: string },
+): Promise<void> {
+  const { error } = await supabase.from("reports").insert({
+    reporter_id: reporterId,
+    reason,
+    listing_id: opts?.listingId ?? null,
+    reported_user_id: opts?.reportedUserId ?? null,
+  });
+  if (error) throw error;
 }

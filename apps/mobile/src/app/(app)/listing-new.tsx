@@ -260,7 +260,7 @@ export default function NewListing() {
         <Input label="Aidat (₺/ay, ops.)" value={f.dues} onChangeText={(v) => set("dues", v)} keyboardType="numeric" />
         <Input label="Depozito (₺, ops.)" value={f.deposit} onChangeText={(v) => set("deposit", v)} keyboardType="numeric" />
         <Input label="Toplam kişi kapasitesi" value={f.capacity} onChangeText={(v) => set("capacity", v)} keyboardType="numeric" />
-        <Input label="Şu an dolu kişi" value={f.occupied} onChangeText={(v) => set("occupied", v)} keyboardType="numeric" />
+        <Input label="Evde yaşayan kişi sayısı" value={f.occupied} onChangeText={(v) => set("occupied", v)} keyboardType="numeric" />
         <Input label="Oda sayısı (ops.)" value={f.totalRooms} onChangeText={(v) => set("totalRooms", v)} keyboardType="numeric" />
         <Input label="Banyo/tuvalet (ops.)" value={f.bathroomCount} onChangeText={(v) => set("bathroomCount", v)} keyboardType="numeric" />
 

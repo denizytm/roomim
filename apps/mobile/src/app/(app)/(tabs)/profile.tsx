@@ -1,7 +1,7 @@
 import { ROLE_LABELS } from "@hoomies/shared/constants";
 import { computeBadges } from "@hoomies/shared/loyalty";
 import type { UserRole } from "@hoomies/shared/types/database.types";
-import { router, useFocusEffect } from "expo-router";
+import { router, useFocusEffect, type Href } from "expo-router";
 import { useCallback, useState } from "react";
 import { ActivityIndicator, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -131,6 +131,11 @@ export default function ProfileScreen() {
         <Btn
           title="Uyum sorularını güncelle"
           onPress={() => router.push("/compat-edit")}
+          variant="outline"
+        />
+        <Btn
+          title="Destek / Şikayet"
+          onPress={() => router.push("/support" as Href)}
           variant="outline"
         />
         <Btn title="Çıkış yap" onPress={signOut} variant="outline" />

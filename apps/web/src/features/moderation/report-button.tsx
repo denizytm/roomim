@@ -11,9 +11,13 @@ import { createReportAction } from "@/features/moderation/actions";
 export function ReportButton({
   listingId,
   reportedUserId,
+  label = "Şikayet et",
+  placeholder = "Sorunu kısaca açıkla…",
 }: {
   listingId?: string;
   reportedUserId?: string;
+  label?: string;
+  placeholder?: string;
 }) {
   const [open, setOpen] = useState(false);
   const [state, formAction, pending] = useActionState(createReportAction, null);
@@ -33,7 +37,7 @@ export function ReportButton({
         onClick={() => setOpen(true)}
         className="inline-flex items-center gap-1 text-xs text-muted-foreground transition-colors hover:text-destructive"
       >
-        <Flag className="size-3.5" /> Şikayet et
+        <Flag className="size-3.5" /> {label}
       </button>
     );
   }
@@ -44,7 +48,7 @@ export function ReportButton({
       {reportedUserId && (
         <input type="hidden" name="reportedUserId" value={reportedUserId} />
       )}
-      <Textarea name="reason" rows={3} placeholder="Sorunu kısaca açıkla…" required />
+      <Textarea name="reason" rows={3} placeholder={placeholder} required />
       <div className="flex justify-end gap-2">
         <Button type="button" variant="ghost" size="sm" onClick={() => setOpen(false)}>
           Vazgeç

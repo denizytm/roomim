@@ -135,7 +135,7 @@ export function ListingForm({ userId }: { userId: string }) {
             <Input id="capacity" name="capacity" inputMode="numeric" defaultValue="3" required />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="occupied">Şu an dolu kişi</Label>
+            <Label htmlFor="occupied">Evde yaşayan kişi sayısı</Label>
             <Input id="occupied" name="occupied" inputMode="numeric" defaultValue="0" />
           </div>
           <div className="space-y-2">
@@ -148,7 +148,7 @@ export function ListingForm({ userId }: { userId: string }) {
           </div>
         </div>
         <p className="mt-2 text-xs text-muted-foreground">
-          Müsait kişi = kapasite − dolu. Kartlarda kişi ikonlarıyla gösterilir.
+          Müsait kişi = kapasite − evde yaşayan. Kartlarda kişi ikonlarıyla gösterilir.
         </p>
       </Section>
 

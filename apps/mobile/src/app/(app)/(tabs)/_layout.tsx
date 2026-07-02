@@ -34,9 +34,9 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="messages"
         options={{
-          title: "Mesajlar",
+          title: "Eşleşmeler",
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="chatbubbles-outline" size={size} color={color} />
+            <Ionicons name="heart-outline" size={size} color={color} />
           ),
         }}
       />

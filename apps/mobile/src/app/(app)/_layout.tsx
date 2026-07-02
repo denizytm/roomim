@@ -36,6 +36,10 @@ export default function AppLayout() {
           name="compat-edit"
           options={{ headerShown: true, title: "Uyum soruları", headerTintColor: colors.text }}
         />
+        <Stack.Screen
+          name="support"
+          options={{ headerShown: true, title: "Destek / Şikayet", headerTintColor: colors.text }}
+        />
       </Stack.Protected>
     </Stack>
   );

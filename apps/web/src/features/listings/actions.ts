@@ -63,6 +63,18 @@ export async function createListingAction(
   const { supabase, user } = await requireUser();
   const d = parsed.data;
 
+  // Herkes en fazla 1 aktif/açık ilan açabilir.
+  const { count } = await supabase
+    .from("listings")
+    .select("id", { count: "exact", head: true })
+    .eq("owner_id", user.id)
+    .neq("status", "closed");
+  if ((count ?? 0) >= 1) {
+    return {
+      error: "En fazla 1 aktif ilanın olabilir. Yeni ilan için mevcut ilanını kapat.",
+    };
+  }
+
   const { data: listing, error } = await supabase
     .from("listings")
     .insert({

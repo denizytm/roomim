@@ -1,4 +1,4 @@
-import { useLocalSearchParams } from "expo-router";
+import { Stack, useLocalSearchParams } from "expo-router";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
@@ -35,7 +35,7 @@ export default function ChatScreen() {
   const [body, setBody] = useState("");
   const [sending, setSending] = useState(false);
   const [busy, setBusy] = useState(false);
-  const [showProfile, setShowProfile] = useState(true);
+  const [showProfile, setShowProfile] = useState(false);
   const listRef = useRef<FlatList<ChatMessage>>(null);
 
   const load = useCallback(async () => {
@@ -166,6 +166,21 @@ export default function ChatScreen() {
   // Accepted
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.bg }} edges={["bottom"]}>
+      <Stack.Screen
+        options={{
+          title: detail.otherName,
+          headerRight:
+            detail.otherAnswers.length > 0
+              ? () => (
+                  <Pressable onPress={() => setShowProfile((s) => !s)} hitSlop={10}>
+                    <Text style={{ color: colors.primary, fontWeight: "700" }}>
+                      {showProfile ? "Gizle" : "Detay"}
+                    </Text>
+                  </Pressable>
+                )
+              : undefined,
+        }}
+      />
       <KeyboardAvoidingView
         style={{ flex: 1 }}
         behavior={Platform.OS === "ios" ? "padding" : undefined}
@@ -184,16 +199,13 @@ export default function ChatScreen() {
               </Text>
             </Pressable>
           )}
-          {detail.otherAnswers.length > 0 && (
-            <Pressable onPress={() => setShowProfile((s) => !s)} style={{ paddingHorizontal: 10, paddingBottom: 8 }}>
-              <Text style={{ color: colors.text, fontWeight: "600", fontSize: 13 }}>
-                {showProfile ? "▼" : "▶"} {detail.otherName} uyum profili
-                {detail.otherScore != null ? `  ·  %${detail.otherScore}` : ""}
-              </Text>
-            </Pressable>
-          )}
           {showProfile && detail.otherAnswers.length > 0 && (
             <View style={{ paddingHorizontal: 10, paddingBottom: 10 }}>
+              {detail.otherScore != null && (
+                <Text style={{ color: colors.primary, fontWeight: "800", marginBottom: 4 }}>
+                  %{detail.otherScore} uyum
+                </Text>
+              )}
               <CompatList answers={detail.otherAnswers} />
             </View>
           )}

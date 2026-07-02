@@ -1,8 +1,9 @@
 import { redirect } from "next/navigation";
-import { BadgeCheck, Gift, Sparkles, Star } from "lucide-react";
+import { BadgeCheck, Gift, LifeBuoy, Sparkles, Star } from "lucide-react";
 
 import { ProfileForm } from "@/features/profile/profile-form";
 import { ReferralCodes } from "@/features/profile/referral-codes";
+import { ReportButton } from "@/features/moderation/report-button";
 import { requireUser } from "@/lib/auth";
 import { isEffectivelyBanned } from "@/lib/ban";
 import { computeBadges } from "@/lib/loyalty";
@@ -89,6 +90,20 @@ export default async function ProfilePage() {
           <Gift className="size-4 text-primary" /> Referans kodların
         </h2>
         <ReferralCodes codes={codes ?? []} />
+      </div>
+
+      {/* Destek / Şikayet */}
+      <div className="mt-4 rounded-2xl border border-border bg-card p-5">
+        <h2 className="mb-1 flex items-center gap-2 font-semibold">
+          <LifeBuoy className="size-4 text-primary" /> Destek / Şikayet
+        </h2>
+        <p className="mb-3 text-sm text-muted-foreground">
+          Bir sorun mu var ya da bildirmek istediğin bir şey mi? Bize yaz, ekibimiz inceler.
+        </p>
+        <ReportButton
+          label="Destek / şikayet talebi oluştur"
+          placeholder="Talebini veya sorununu açıkla…"
+        />
       </div>
 
       <div className="mt-8">

@@ -34,7 +34,7 @@ export default function MessagesScreen() {
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.bg }} edges={["top"]}>
       <Text style={{ fontSize: 26, fontWeight: "800", color: colors.text, padding: 20, paddingBottom: 8 }}>
-        Mesajlar
+        Eşleşmeler
       </Text>
 
       {items === null ? (
@@ -43,7 +43,7 @@ export default function MessagesScreen() {
         </View>
       ) : items.length === 0 ? (
         <View style={{ flex: 1, alignItems: "center", justifyContent: "center", padding: 32 }}>
-          <Text style={{ fontWeight: "700", color: colors.text, fontSize: 16 }}>Henüz mesajın yok</Text>
+          <Text style={{ fontWeight: "700", color: colors.text, fontSize: 16 }}>Henüz eşleşmen yok</Text>
           <Text style={{ color: colors.muted, textAlign: "center", marginTop: 6 }}>
             Keşfet'te bir ilanı sağa kaydırarak ilgi göster.
           </Text>
