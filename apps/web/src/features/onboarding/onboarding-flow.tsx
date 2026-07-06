@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { saveOnboardingAction } from "@/features/profile/actions";
+import { ROLE_DESCRIPTIONS, ROLE_LABELS } from "@/lib/constants";
 import type {
   CompatibilityCategory,
   CompatibilityQuestion,
@@ -23,9 +24,16 @@ type Props = {
 };
 
 export function OnboardingFlow({ categories, questions, role }: Props) {
+  const [chosenRole, setChosenRole] = useState<UserRole | null>(null);
   const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState<Record<string, number>>({});
   const [pending, startTransition] = useTransition();
+
+  // 1. Adım: rol seçimi (her onboarding başında sorulur)
+  if (!chosenRole) {
+    return <RoleStep initial={role} onPick={setChosenRole} />;
+  }
+  const activeRole: UserRole = chosenRole;
 
   const total = categories.length;
   const category = categories[step];
@@ -40,7 +48,7 @@ export function OnboardingFlow({ categories, questions, role }: Props) {
     }
     if (isLast) {
       startTransition(async () => {
-        const res = await saveOnboardingAction({ role, answers });
+        const res = await saveOnboardingAction({ role: activeRole, answers });
         if (res?.error) toast.error(res.error);
       });
     } else {
@@ -129,6 +137,43 @@ export function OnboardingFlow({ categories, questions, role }: Props) {
           {isLast ? "Tamamla" : "İleri"}
           {!isLast && !pending && <ArrowRight />}
         </Button>
+      </div>
+    </div>
+  );
+}
+
+function RoleStep({
+  initial,
+  onPick,
+}: {
+  initial: UserRole;
+  onPick: (r: UserRole) => void;
+}) {
+  const roles: UserRole[] = ["seeker", "host"];
+  return (
+    <div className="mx-auto w-full max-w-2xl px-4 py-14">
+      <h1 className="text-2xl font-bold tracking-tight">Nasıl kullanacaksın?</h1>
+      <p className="mt-1 text-muted-foreground">Deneyimini buna göre uyarlıyoruz.</p>
+      <div className="mt-8 grid gap-4 sm:grid-cols-2">
+        {roles.map((r) => (
+          <button
+            key={r}
+            type="button"
+            onClick={() => onPick(r)}
+            className={cn(
+              "rounded-2xl border p-6 text-left transition-all hover:-translate-y-0.5 hover:shadow-md",
+              r === initial
+                ? "border-primary/40 bg-primary/5"
+                : "border-border bg-card hover:border-primary/40",
+            )}
+          >
+            <p className="text-lg font-bold text-primary">
+              {r === "seeker" ? "🔎 " : "🏠 "}
+              {ROLE_LABELS[r]}
+            </p>
+            <p className="mt-1.5 text-sm text-muted-foreground">{ROLE_DESCRIPTIONS[r]}</p>
+          </button>
+        ))}
       </div>
     </div>
   );
