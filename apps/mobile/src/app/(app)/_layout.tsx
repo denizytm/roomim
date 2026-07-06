@@ -55,10 +55,6 @@ export default function AppLayout() {
           name="search"
           options={{ headerShown: true, title: "İlan ara", headerTintColor: colors.text }}
         />
-        <Stack.Screen
-          name="liked"
-          options={{ headerShown: true, title: "Beğendiklerim", headerTintColor: colors.text }}
-        />
       </Stack.Protected>
       </Stack>
     </>

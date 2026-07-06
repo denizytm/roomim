@@ -38,22 +38,31 @@ export function OnboardingFlow({ categories, questions, role }: Props) {
   const total = categories.length;
   const category = categories[step];
   const stepQuestions = questions.filter((q) => q.category_id === category?.id);
-  const allAnswered = stepQuestions.every((q) => answers[String(q.id)] != null);
   const isLast = step === total - 1;
 
+  function submit() {
+    startTransition(async () => {
+      const res = await saveOnboardingAction({ role: activeRole, answers });
+      if (res?.error) toast.error(res.error);
+    });
+  }
+
   function next() {
-    if (!allAnswered) {
-      toast.error("Bu adımdaki tüm soruları yanıtla.");
+    if (!isLast) {
+      setStep((s) => s + 1);
       return;
     }
-    if (isLast) {
-      startTransition(async () => {
-        const res = await saveOnboardingAction({ role: activeRole, answers });
-        if (res?.error) toast.error(res.error);
-      });
-    } else {
-      setStep((s) => s + 1);
+    // Uyum soruları opsiyonel — eksik varsa uyar ama yine de bitirmeye izin ver.
+    const answered = Object.keys(answers).length;
+    if (
+      answered < questions.length &&
+      !window.confirm(
+        `${answered}/${questions.length} soruyu yanıtladın. Boş bıraktıkların için uyum skorun tam hesaplanamayabilir — Profil'den sonra tamamlayabilirsin. Yine de bitirilsin mi?`,
+      )
+    ) {
+      return;
     }
+    submit();
   }
 
   return (
@@ -82,7 +91,8 @@ export function OnboardingFlow({ categories, questions, role }: Props) {
               Yaşam tarzını tanıyalım
             </h1>
             <p className="mt-1 text-muted-foreground">
-              Bu yanıtlar uyum skorunu belirler — istediğin zaman güncelleyebilirsin.
+              Bu yanıtlar uyum skorunu belirler. İstersen boş bırak — sonra Profil&apos;den
+              güncelleyebilirsin.
             </p>
           </div>
 

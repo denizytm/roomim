@@ -46,14 +46,9 @@ export default function DeckScreen() {
         }}
       >
         <Text style={{ fontSize: 22, fontWeight: "800", color: colors.primary }}>hoomies</Text>
-        <View style={{ flexDirection: "row", gap: 18 }}>
-          <Pressable onPress={() => router.push("/search" as Href)} hitSlop={8}>
-            <Ionicons name="search-outline" size={24} color={colors.text} />
-          </Pressable>
-          <Pressable onPress={() => router.push("/liked" as Href)} hitSlop={8}>
-            <Ionicons name="heart-outline" size={24} color={colors.text} />
-          </Pressable>
-        </View>
+        <Pressable onPress={() => router.push("/search" as Href)} hitSlop={8}>
+          <Ionicons name="search-outline" size={24} color={colors.text} />
+        </Pressable>
       </View>
       {cards === null ? (
         <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>

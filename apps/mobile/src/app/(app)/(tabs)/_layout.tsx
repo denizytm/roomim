@@ -1,9 +1,13 @@
 import { Ionicons } from "@expo/vector-icons";
 import { Tabs } from "expo-router";
 
+import { useSession } from "@/lib/auth-context";
 import { colors } from "@/lib/theme";
 
 export default function TabsLayout() {
+  const { profile } = useSession();
+  const isHost = profile?.role === "host";
+
   return (
     <Tabs
       screenOptions={{
@@ -22,6 +26,7 @@ export default function TabsLayout() {
           ),
         }}
       />
+      {/* İlan veren → İlanlarım; ev arayan → Beğendiklerim (rol'e göre biri gizlenir) */}
       <Tabs.Screen
         name="listings"
         options={{
@@ -29,6 +34,17 @@ export default function TabsLayout() {
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="home-outline" size={size} color={color} />
           ),
+          href: isHost ? undefined : null,
+        }}
+      />
+      <Tabs.Screen
+        name="liked"
+        options={{
+          title: "Beğendiklerim",
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="heart-outline" size={size} color={color} />
+          ),
+          href: isHost ? null : undefined,
         }}
       />
       <Tabs.Screen
@@ -36,7 +52,7 @@ export default function TabsLayout() {
         options={{
           title: "Eşleşmeler",
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="heart-outline" size={size} color={color} />
+            <Ionicons name="chatbubbles-outline" size={size} color={color} />
           ),
         }}
       />

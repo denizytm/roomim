@@ -30,16 +30,16 @@ import { colors } from "@/lib/theme";
 
 type Photo = { path: string; category: string };
 
-function Input(props: React.ComponentProps<typeof TextInput> & { label: string }) {
-  const { label, ...rest } = props;
+function Input(props: React.ComponentProps<typeof TextInput> & { label: string; error?: string }) {
+  const { label, error, ...rest } = props;
   return (
     <View style={{ gap: 6 }}>
       <Text style={{ fontSize: 13, fontWeight: "600", color: colors.text }}>{label}</Text>
       <TextInput
         placeholderTextColor={colors.muted}
         style={{
-          borderWidth: 1,
-          borderColor: colors.border,
+          borderWidth: error ? 1.5 : 1,
+          borderColor: error ? colors.danger : colors.border,
           borderRadius: 12,
           paddingHorizontal: 14,
           paddingVertical: 11,
@@ -49,6 +49,7 @@ function Input(props: React.ComponentProps<typeof TextInput> & { label: string }
         }}
         {...rest}
       />
+      {error ? <Text style={{ color: colors.danger, fontSize: 12 }}>{error}</Text> : null}
     </View>
   );
 }
@@ -80,6 +81,7 @@ export default function NewListing() {
   const [photos, setPhotos] = useState<Photo[]>([]);
   const [uploading, setUploading] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
   const [f, setF] = useState({
     title: "",
@@ -100,7 +102,15 @@ export default function NewListing() {
     billsIncluded: false,
     features: [] as string[],
   });
-  const set = (k: keyof typeof f, v: unknown) => setF((p) => ({ ...p, [k]: v }));
+  const set = (k: keyof typeof f, v: unknown) => {
+    setF((p) => ({ ...p, [k]: v }));
+    setErrors((prev) => {
+      if (!prev[k]) return prev;
+      const n = { ...prev };
+      delete n[k];
+      return n;
+    });
+  };
 
   async function pickFor(category: string) {
     if (!userId) return;
@@ -160,7 +170,23 @@ export default function NewListing() {
       features: f.features,
     });
     if (!parsed.success) {
-      Alert.alert("Eksik/hatalı", parsed.error.issues[0]?.message ?? "Formu kontrol et");
+      const errs: Record<string, string> = {};
+      for (const issue of parsed.error.issues) {
+        const key = String(issue.path[0] ?? "");
+        if (key && !errs[key]) errs[key] = issue.message;
+      }
+      setErrors(errs);
+      // Sadece hatalı alanları sıfırla; geçerli girdiler korunur.
+      setF((prev) => {
+        const n = { ...prev };
+        for (const key of Object.keys(errs)) {
+          if (key in n && typeof n[key as keyof typeof n] === "string") {
+            (n as Record<string, unknown>)[key] = "";
+          }
+        }
+        return n;
+      });
+      Alert.alert("Hatalı alanlar", "Kırmızı ile işaretlenen alanları düzelt.");
       return;
     }
     setSaving(true);
@@ -226,27 +252,40 @@ export default function NewListing() {
           })}
         </View>
 
-        <Input label="Başlık" value={f.title} onChangeText={(v) => set("title", v)} placeholder="3 kişilik evde 1 oda" />
+        <Input label="Başlık" value={f.title} onChangeText={(v) => set("title", v)} placeholder="3 kişilik evde 1 oda" error={errors.title} />
         <Input
           label="Açıklama"
           value={f.description}
           onChangeText={(v) => set("description", v)}
           placeholder="Ev, ortak alanlar, mahalle…"
           multiline
+          error={errors.description}
         />
 
         {/* Şehir / İlçe */}
         <View style={{ gap: 8 }}>
-          <Text style={{ fontSize: 13, fontWeight: "600", color: colors.text }}>Şehir</Text>
+          <Text style={{ fontSize: 13, fontWeight: "600", color: errors.city ? colors.danger : colors.text }}>
+            Şehir{errors.city ? ` — ${errors.city}` : ""}
+          </Text>
           <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
             {CITIES.map((c) => (
-              <Chip key={c} label={c} active={f.city === c} onPress={() => setF((p) => ({ ...p, city: c, district: "" }))} />
+              <Chip
+                key={c}
+                label={c}
+                active={f.city === c}
+                onPress={() => {
+                  setF((p) => ({ ...p, city: c, district: "" }));
+                  setErrors((prev) => ({ ...prev, city: "", district: "" }));
+                }}
+              />
             ))}
           </View>
         </View>
         {f.city ? (
           <View style={{ gap: 8 }}>
-            <Text style={{ fontSize: 13, fontWeight: "600", color: colors.text }}>İlçe</Text>
+            <Text style={{ fontSize: 13, fontWeight: "600", color: errors.district ? colors.danger : colors.text }}>
+              İlçe{errors.district ? ` — ${errors.district}` : ""}
+            </Text>
             <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
               {districts.map((d) => (
                 <Chip key={d} label={d} active={f.district === d} onPress={() => set("district", d)} />
@@ -254,15 +293,15 @@ export default function NewListing() {
             </View>
           </View>
         ) : null}
-        <Input label="Semt / Mahalle (ops.)" value={f.neighborhood} onChangeText={(v) => set("neighborhood", v)} />
+        <Input label="Semt / Mahalle (ops.)" value={f.neighborhood} onChangeText={(v) => set("neighborhood", v)} error={errors.neighborhood} />
 
-        <Input label="Aylık kira (₺)" value={f.monthlyRent} onChangeText={(v) => set("monthlyRent", v)} keyboardType="numeric" />
-        <Input label="Aidat (₺/ay, ops.)" value={f.dues} onChangeText={(v) => set("dues", v)} keyboardType="numeric" />
-        <Input label="Depozito (₺, ops.)" value={f.deposit} onChangeText={(v) => set("deposit", v)} keyboardType="numeric" />
-        <Input label="Toplam kişi kapasitesi" value={f.capacity} onChangeText={(v) => set("capacity", v)} keyboardType="numeric" />
-        <Input label="Evde yaşayan kişi sayısı" value={f.occupied} onChangeText={(v) => set("occupied", v)} keyboardType="numeric" />
-        <Input label="Oda sayısı (ops.)" value={f.totalRooms} onChangeText={(v) => set("totalRooms", v)} keyboardType="numeric" />
-        <Input label="Banyo/tuvalet (ops.)" value={f.bathroomCount} onChangeText={(v) => set("bathroomCount", v)} keyboardType="numeric" />
+        <Input label="Aylık kira (₺)" value={f.monthlyRent} onChangeText={(v) => set("monthlyRent", v)} keyboardType="numeric" error={errors.monthlyRent} />
+        <Input label="Aidat (₺/ay, ops.)" value={f.dues} onChangeText={(v) => set("dues", v)} keyboardType="numeric" error={errors.dues} />
+        <Input label="Depozito (₺, ops.)" value={f.deposit} onChangeText={(v) => set("deposit", v)} keyboardType="numeric" error={errors.deposit} />
+        <Input label="Toplam kişi kapasitesi" value={f.capacity} onChangeText={(v) => set("capacity", v)} keyboardType="numeric" error={errors.capacity} />
+        <Input label="Evde yaşayan kişi sayısı" value={f.occupied} onChangeText={(v) => set("occupied", v)} keyboardType="numeric" error={errors.occupied} />
+        <Input label="Oda sayısı (ops.)" value={f.totalRooms} onChangeText={(v) => set("totalRooms", v)} keyboardType="numeric" error={errors.totalRooms} />
+        <Input label="Banyo/tuvalet (ops.)" value={f.bathroomCount} onChangeText={(v) => set("bathroomCount", v)} keyboardType="numeric" error={errors.bathroomCount} />
 
         <View style={{ gap: 8 }}>
           <Text style={{ fontSize: 13, fontWeight: "600", color: colors.text }}>Cinsiyet tercihi</Text>

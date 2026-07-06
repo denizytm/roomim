@@ -21,17 +21,17 @@ export default function LikedScreen() {
     }, [session?.user.id]),
   );
 
-  if (items === null) {
-    return (
-      <View style={{ flex: 1, alignItems: "center", justifyContent: "center", backgroundColor: colors.bg }}>
-        <ActivityIndicator color={colors.primary} size="large" />
-      </View>
-    );
-  }
-
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: colors.bg }} edges={["bottom"]}>
-      {items.length === 0 ? (
+    <SafeAreaView style={{ flex: 1, backgroundColor: colors.bg }} edges={["top"]}>
+      <Text style={{ fontSize: 26, fontWeight: "800", color: colors.text, padding: 20, paddingBottom: 8 }}>
+        Beğendiklerim
+      </Text>
+
+      {items === null ? (
+        <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
+          <ActivityIndicator color={colors.primary} size="large" />
+        </View>
+      ) : items.length === 0 ? (
         <View style={{ flex: 1, alignItems: "center", justifyContent: "center", padding: 32 }}>
           <Text style={{ fontWeight: "700", color: colors.text, fontSize: 16 }}>Henüz beğenin yok</Text>
           <Text style={{ color: colors.muted, textAlign: "center", marginTop: 6 }}>
