@@ -92,11 +92,12 @@ export async function SiteHeader() {
               {profile?.is_admin && (
                 <Button
                   variant="ghost"
-                  size="icon-sm"
+                  size="sm"
                   render={<Link href="/moderation" />}
                   aria-label="Moderasyon"
+                  className="font-medium text-primary"
                 >
-                  <ShieldCheck />
+                  <ShieldCheck /> <span className="hidden sm:inline">Moderasyon</span>
                 </Button>
               )}
               <Link
