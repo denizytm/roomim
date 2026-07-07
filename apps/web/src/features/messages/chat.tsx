@@ -1,7 +1,19 @@
 "use client";
 
 import { useEffect, useRef, useState, useTransition } from "react";
-import { Check, Loader2, MapPin, PartyPopper, Send, ShieldAlert, X } from "lucide-react";
+import {
+  Check,
+  ImageIcon,
+  Loader2,
+  Mic,
+  MapPin,
+  PartyPopper,
+  Send,
+  ShieldAlert,
+  Smile,
+  Square,
+  X,
+} from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -11,6 +23,12 @@ import { setConversationStatusAction } from "@/features/messages/actions";
 import { createClient } from "@/lib/supabase/client";
 import type { ConversationStatus, Message } from "@/lib/types/database.types";
 import { cn } from "@/lib/utils";
+
+const EMOJIS = [
+  "😀","😁","😂","🤣","😊","😍","😘","😎","🤔","😅",
+  "🙌","👍","👎","🙏","👋","🎉","❤️","🔥","✨","🥳",
+  "😢","😭","😡","😴","🤝","💯","👏","🙂","😉","🤗",
+];
 
 type Props = {
   conversationId: string;
@@ -36,8 +54,14 @@ export function Chat({
   const [messages, setMessages] = useState<Message[]>(initialMessages);
   const [body, setBody] = useState("");
   const [sending, setSending] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [showEmoji, setShowEmoji] = useState(false);
+  const [recording, setRecording] = useState(false);
   const [statusPending, startStatus] = useTransition();
   const bottomRef = useRef<HTMLDivElement>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
+  const recorderRef = useRef<MediaRecorder | null>(null);
+  const chunksRef = useRef<Blob[]>([]);
 
   // Realtime: yeni mesajları dinle
   useEffect(() => {
@@ -47,7 +71,6 @@ export function Chat({
     let channel: ReturnType<typeof supabase.channel> | null = null;
 
     (async () => {
-      // RLS'li realtime için token'ı abonelikten önce set et.
       const {
         data: { session },
       } = await supabase.auth.getSession();
@@ -98,6 +121,74 @@ export function Chat({
       return;
     }
     setBody("");
+    setShowEmoji(false);
+  }
+
+  // Görsel/ses ekini yükle ve mesaj olarak gönder.
+  async function uploadAndSend(file: Blob, type: "image" | "audio", ext: string) {
+    setUploading(true);
+    const supabase = createClient();
+    const path = `${meId}/${Date.now()}-${Math.floor(Math.random() * 1e6)}.${ext}`;
+    const { error: upErr } = await supabase.storage
+      .from("chat-media")
+      .upload(path, file, { contentType: file.type || undefined });
+    if (upErr) {
+      setUploading(false);
+      toast.error("Yükleme başarısız: " + upErr.message);
+      return;
+    }
+    const { data } = supabase.storage.from("chat-media").getPublicUrl(path);
+    const { error } = await supabase.from("messages").insert({
+      conversation_id: conversationId,
+      sender_id: meId,
+      body: "",
+      attachment_url: data.publicUrl,
+      attachment_type: type,
+    });
+    setUploading(false);
+    if (error) toast.error("Gönderilemedi: " + error.message);
+  }
+
+  function onPickImage(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    if (file.size > 8 * 1024 * 1024) {
+      toast.error("Görsel en fazla 8 MB olabilir.");
+      return;
+    }
+    const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
+    uploadAndSend(file, "image", ext);
+  }
+
+  async function toggleRecording() {
+    if (recording) {
+      recorderRef.current?.stop();
+      setRecording(false);
+      return;
+    }
+    if (!navigator.mediaDevices?.getUserMedia) {
+      toast.error("Tarayıcın ses kaydını desteklemiyor.");
+      return;
+    }
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mr = new MediaRecorder(stream);
+      chunksRef.current = [];
+      mr.ondataavailable = (ev) => {
+        if (ev.data.size) chunksRef.current.push(ev.data);
+      };
+      mr.onstop = async () => {
+        stream.getTracks().forEach((t) => t.stop());
+        const blob = new Blob(chunksRef.current, { type: mr.mimeType || "audio/webm" });
+        await uploadAndSend(blob, "audio", "webm");
+      };
+      mr.start();
+      recorderRef.current = mr;
+      setRecording(true);
+    } catch {
+      toast.error("Mikrofon erişimi reddedildi.");
+    }
   }
 
   function changeStatus(next: "accepted" | "declined") {
@@ -112,7 +203,6 @@ export function Chat({
       "Paylaşmak istediğin adresi yaz (sadece onayladığında gönderilir):",
     );
     if (!addr || !addr.trim()) return;
-    // İkinci onay adımı
     if (
       !window.confirm(
         "Adresini karşı tarafla paylaşmak üzeresin. Bu geri alınamaz — onaylıyor musun?",
@@ -213,13 +303,25 @@ export function Chat({
               >
                 <div
                   className={cn(
-                    "max-w-[75%] rounded-2xl px-3.5 py-2 text-sm",
+                    "max-w-[75%] overflow-hidden rounded-2xl text-sm",
+                    m.attachment_type ? "p-1" : "px-3.5 py-2",
                     mine
                       ? "rounded-br-sm bg-primary text-primary-foreground"
                       : "rounded-bl-sm bg-muted text-foreground",
                   )}
                 >
-                  {m.body}
+                  {m.attachment_type === "image" && m.attachment_url ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={m.attachment_url}
+                      alt="Görsel"
+                      className="max-h-64 rounded-xl object-cover"
+                    />
+                  ) : m.attachment_type === "audio" && m.attachment_url ? (
+                    <audio controls src={m.attachment_url} className="h-10 w-56 max-w-full" />
+                  ) : (
+                    m.body
+                  )}
                 </div>
               </div>
             );
@@ -229,7 +331,7 @@ export function Chat({
       </div>
 
       {/* Giriş alanı */}
-      <div className="border-t border-border p-3">
+      <div className="relative border-t border-border p-3">
         <div className="mb-2 flex items-center gap-2">
           <Button variant="ghost" size="xs" onClick={shareAddress}>
             <MapPin /> Adres paylaş
@@ -237,19 +339,79 @@ export function Chat({
           <span className="flex items-center gap-1 text-xs text-muted-foreground">
             <ShieldAlert className="size-3.5" /> İki onaylı
           </span>
+          {uploading && (
+            <span className="flex items-center gap-1 text-xs text-primary">
+              <Loader2 className="size-3.5 animate-spin" /> Yükleniyor…
+            </span>
+          )}
         </div>
+
+        {showEmoji && (
+          <div className="absolute bottom-full left-3 mb-2 grid max-w-70 grid-cols-8 gap-1 rounded-xl border border-border bg-popover p-2 shadow-lg">
+            {EMOJIS.map((e) => (
+              <button
+                key={e}
+                type="button"
+                className="rounded-md p-1 text-lg hover:bg-muted"
+                onClick={() => setBody((b) => b + e)}
+              >
+                {e}
+              </button>
+            ))}
+          </div>
+        )}
+
+        <input
+          ref={fileRef}
+          type="file"
+          accept="image/*"
+          className="hidden"
+          onChange={onPickImage}
+        />
+
         <form
-          className="flex items-center gap-2"
+          className="flex items-center gap-1.5"
           onSubmit={(e) => {
             e.preventDefault();
             send();
           }}
         >
+          <Button
+            type="button"
+            size="icon"
+            variant="ghost"
+            aria-label="Emoji"
+            onClick={() => setShowEmoji((s) => !s)}
+          >
+            <Smile />
+          </Button>
+          <Button
+            type="button"
+            size="icon"
+            variant="ghost"
+            aria-label="Görsel gönder"
+            disabled={uploading}
+            onClick={() => fileRef.current?.click()}
+          >
+            <ImageIcon />
+          </Button>
+          <Button
+            type="button"
+            size="icon"
+            variant={recording ? "destructive" : "ghost"}
+            aria-label={recording ? "Kaydı durdur" : "Sesli mesaj"}
+            disabled={uploading}
+            onClick={toggleRecording}
+          >
+            {recording ? <Square /> : <Mic />}
+          </Button>
           <Input
             value={body}
             onChange={(e) => setBody(e.target.value)}
-            placeholder="Mesaj yaz…"
+            placeholder={recording ? "Kaydediliyor…" : "Mesaj yaz…"}
             autoComplete="off"
+            disabled={recording}
+            onFocus={() => setShowEmoji(false)}
           />
           <Button type="submit" size="icon" disabled={sending || !body.trim()}>
             {sending ? <Loader2 className="animate-spin" /> : <Send />}

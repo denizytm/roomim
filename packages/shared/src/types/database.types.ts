@@ -226,6 +226,8 @@ export type Database = {
           conversation_id: string;
           sender_id: string;
           body: string;
+          attachment_url: string | null;
+          attachment_type: string | null;
           created_at: string;
         };
         Insert: {
@@ -233,6 +235,8 @@ export type Database = {
           conversation_id: string;
           sender_id: string;
           body: string;
+          attachment_url?: string | null;
+          attachment_type?: string | null;
           created_at?: string;
         };
         Update: Partial<Database["public"]["Tables"]["messages"]["Insert"]>;

@@ -445,7 +445,13 @@ export async function getConversations(userId: string): Promise<ConvListItem[]> 
   });
 }
 
-export type ChatMessage = { id: string; sender_id: string; body: string };
+export type ChatMessage = {
+  id: string;
+  sender_id: string;
+  body: string;
+  attachmentUrl: string | null;
+  attachmentType: string | null;
+};
 
 export type ChatDetail = {
   status: string;
@@ -486,7 +492,7 @@ export async function getConversationDetail(
       supabase.from("profiles").select("id, full_name, avatar_url").eq("id", otherId).maybeSingle(),
       supabase
         .from("messages")
-        .select("id, sender_id, body, created_at")
+        .select("id, sender_id, body, attachment_url, attachment_type, created_at")
         .eq("conversation_id", id)
         .order("created_at", { ascending: true }),
       supabase.rpc("conversation_other_answers", { conv_id: id }),
@@ -520,17 +526,60 @@ export async function getConversationDetail(
     listingStatus: listing?.status ?? null,
     listingTitle: listing?.title ?? null,
     district: listing?.district ?? null,
-    messages: (messages ?? []).map((m) => ({ id: m.id, sender_id: m.sender_id, body: m.body })),
+    messages: (messages ?? []).map((m) => ({
+      id: m.id,
+      sender_id: m.sender_id,
+      body: m.body,
+      attachmentUrl: m.attachment_url,
+      attachmentType: m.attachment_type,
+    })),
     otherScore,
     otherAnswers,
   };
 }
 
-export async function sendMessage(convId: string, senderId: string, body: string): Promise<void> {
-  const { error } = await supabase
-    .from("messages")
-    .insert({ conversation_id: convId, sender_id: senderId, body });
+export async function sendMessage(
+  convId: string,
+  senderId: string,
+  body: string,
+  attachment?: { url: string; type: "image" | "audio" },
+): Promise<void> {
+  const { error } = await supabase.from("messages").insert({
+    conversation_id: convId,
+    sender_id: senderId,
+    body,
+    attachment_url: attachment?.url ?? null,
+    attachment_type: attachment?.type ?? null,
+  });
   if (error) throw error;
+}
+
+// Sohbet görselini (base64) chat-media bucket'ına yükle, public URL döndür.
+export async function uploadChatImage(
+  userId: string,
+  base64: string,
+  ext: string,
+): Promise<string> {
+  const { decode } = await import("base64-arraybuffer");
+  const path = `${userId}/${Date.now()}-${Math.floor(Math.random() * 1e6)}.${ext}`;
+  const contentType = ext === "png" ? "image/png" : "image/jpeg";
+  const { error } = await supabase.storage
+    .from("chat-media")
+    .upload(path, decode(base64), { contentType });
+  if (error) throw error;
+  return publicImageUrl("chat-media", path)!;
+}
+
+// Kaydedilen ses dosyasını (file:// uri) chat-media'ya yükle, public URL döndür.
+export async function uploadChatAudio(userId: string, uri: string): Promise<string> {
+  const res = await fetch(uri);
+  const bytes = await res.arrayBuffer();
+  const path = `${userId}/${Date.now()}-${Math.floor(Math.random() * 1e6)}.m4a`;
+  const { error } = await supabase.storage
+    .from("chat-media")
+    .upload(path, bytes, { contentType: "audio/mp4" });
+  if (error) throw error;
+  return publicImageUrl("chat-media", path)!;
 }
 
 export async function setConversationStatus(

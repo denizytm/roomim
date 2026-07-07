@@ -1,4 +1,14 @@
+import { Ionicons } from "@expo/vector-icons";
+import {
+  RecordingPresets,
+  requestRecordingPermissionsAsync,
+  setAudioModeAsync,
+  useAudioPlayer,
+  useAudioPlayerStatus,
+  useAudioRecorder,
+} from "expo-audio";
 import { Image } from "expo-image";
+import * as ImagePicker from "expo-image-picker";
 import { router, Stack, useLocalSearchParams, type Href } from "expo-router";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
@@ -8,6 +18,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   Pressable,
+  ScrollView,
   Text,
   TextInput,
   View,
@@ -21,11 +32,19 @@ import {
   getConversationDetail,
   sendMessage,
   setConversationStatus,
+  uploadChatAudio,
+  uploadChatImage,
   type ChatDetail,
   type ChatMessage,
 } from "@/lib/queries";
 import { supabase } from "@/lib/supabase";
 import { colors } from "@/lib/theme";
+
+const EMOJIS = [
+  "😀","😁","😂","🤣","😊","😍","😘","😎","🤔","😅",
+  "🙌","👍","👎","🙏","👋","🎉","❤️","🔥","✨","🥳",
+  "😢","😭","😡","😴","🤝","💯","👏","🙂","😉","🤗",
+];
 
 export default function ChatScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -38,6 +57,10 @@ export default function ChatScreen() {
   const [sending, setSending] = useState(false);
   const [busy, setBusy] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
+  const [showEmoji, setShowEmoji] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [recording, setRecording] = useState(false);
+  const recorder = useAudioRecorder(RecordingPresets.HIGH_QUALITY);
   const listRef = useRef<FlatList<ChatMessage>>(null);
 
   const load = useCallback(async () => {
@@ -60,9 +83,26 @@ export default function ChatScreen() {
         "postgres_changes",
         { event: "INSERT", schema: "public", table: "messages", filter: `conversation_id=eq.${id}` },
         (payload) => {
-          const m = payload.new as { id: string; sender_id: string; body: string };
+          const m = payload.new as {
+            id: string;
+            sender_id: string;
+            body: string;
+            attachment_url: string | null;
+            attachment_type: string | null;
+          };
           setMessages((prev) =>
-            prev.some((x) => x.id === m.id) ? prev : [...prev, { id: m.id, sender_id: m.sender_id, body: m.body }],
+            prev.some((x) => x.id === m.id)
+              ? prev
+              : [
+                  ...prev,
+                  {
+                    id: m.id,
+                    sender_id: m.sender_id,
+                    body: m.body,
+                    attachmentUrl: m.attachment_url,
+                    attachmentType: m.attachment_type,
+                  },
+                ],
           );
         },
       )
@@ -79,10 +119,63 @@ export default function ChatScreen() {
     try {
       await sendMessage(id, meId, text);
       setBody("");
+      setShowEmoji(false);
     } catch (e) {
       Alert.alert("Hata", e instanceof Error ? e.message : "Mesaj gönderilemedi");
     }
     setSending(false);
+  }
+
+  async function pickImage() {
+    if (!id || !meId) return;
+    const res = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ["images"],
+      base64: true,
+      quality: 0.7,
+    });
+    if (res.canceled || !res.assets[0]?.base64) return;
+    const asset = res.assets[0];
+    const ext = (asset.uri.split(".").pop() || "jpg").toLowerCase().replace(/[^a-z]/g, "") || "jpg";
+    setUploading(true);
+    try {
+      const url = await uploadChatImage(meId, asset.base64!, ext);
+      await sendMessage(id, meId, "", { url, type: "image" });
+    } catch (e) {
+      Alert.alert("Hata", e instanceof Error ? e.message : "Görsel gönderilemedi");
+    }
+    setUploading(false);
+  }
+
+  async function toggleRecord() {
+    if (!id || !meId) return;
+    if (recording) {
+      setRecording(false);
+      try {
+        await recorder.stop();
+        const uri = recorder.uri;
+        if (!uri) return;
+        setUploading(true);
+        const url = await uploadChatAudio(meId, uri);
+        await sendMessage(id, meId, "", { url, type: "audio" });
+      } catch (e) {
+        Alert.alert("Hata", e instanceof Error ? e.message : "Ses gönderilemedi");
+      }
+      setUploading(false);
+      return;
+    }
+    try {
+      const perm = await requestRecordingPermissionsAsync();
+      if (!perm.granted) {
+        Alert.alert("İzin gerekli", "Sesli mesaj için mikrofon izni ver.");
+        return;
+      }
+      await setAudioModeAsync({ allowsRecording: true, playsInSilentMode: true });
+      await recorder.prepareToRecordAsync();
+      recorder.record();
+      setRecording(true);
+    } catch (e) {
+      Alert.alert("Hata", e instanceof Error ? e.message : "Kayıt başlatılamadı");
+    }
   }
 
   async function changeStatus(next: "accepted" | "declined") {
@@ -248,40 +341,86 @@ export default function ChatScreen() {
           }
           renderItem={({ item }) => {
             const mine = item.sender_id === meId;
+            const isImage = item.attachmentType === "image" && item.attachmentUrl;
+            const isAudio = item.attachmentType === "audio" && item.attachmentUrl;
             return (
               <View style={{ alignSelf: mine ? "flex-end" : "flex-start", maxWidth: "78%" }}>
-                <View
-                  style={{
-                    backgroundColor: mine ? colors.primary : "#EFEFF2",
-                    borderRadius: 16,
-                    borderBottomRightRadius: mine ? 4 : 16,
-                    borderBottomLeftRadius: mine ? 16 : 4,
-                    paddingHorizontal: 14,
-                    paddingVertical: 9,
-                  }}
-                >
-                  <Text style={{ color: mine ? "#fff" : colors.text, fontSize: 15 }}>{item.body}</Text>
-                </View>
+                {isImage ? (
+                  <Image
+                    source={{ uri: item.attachmentUrl! }}
+                    style={{ width: 200, height: 200, borderRadius: 16 }}
+                    contentFit="cover"
+                  />
+                ) : isAudio ? (
+                  <AudioBubble uri={item.attachmentUrl!} mine={mine} />
+                ) : (
+                  <View
+                    style={{
+                      backgroundColor: mine ? colors.primary : "#EFEFF2",
+                      borderRadius: 16,
+                      borderBottomRightRadius: mine ? 4 : 16,
+                      borderBottomLeftRadius: mine ? 16 : 4,
+                      paddingHorizontal: 14,
+                      paddingVertical: 9,
+                    }}
+                  >
+                    <Text style={{ color: mine ? "#fff" : colors.text, fontSize: 15 }}>{item.body}</Text>
+                  </View>
+                )}
               </View>
             );
           }}
         />
 
+        {uploading && (
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 6, paddingHorizontal: 14, paddingTop: 6 }}>
+            <ActivityIndicator color={colors.primary} size="small" />
+            <Text style={{ color: colors.primary, fontSize: 12 }}>Gönderiliyor…</Text>
+          </View>
+        )}
+
+        {showEmoji && (
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={{ gap: 6, paddingHorizontal: 12, paddingVertical: 8 }}
+            keyboardShouldPersistTaps="handled"
+            style={{ borderTopColor: colors.border, borderTopWidth: 1 }}
+          >
+            {EMOJIS.map((e) => (
+              <Pressable key={e} onPress={() => setBody((b) => b + e)} hitSlop={4}>
+                <Text style={{ fontSize: 26 }}>{e}</Text>
+              </Pressable>
+            ))}
+          </ScrollView>
+        )}
+
         <View
           style={{
             flexDirection: "row",
             alignItems: "center",
-            gap: 8,
+            gap: 6,
             padding: 10,
             borderTopColor: colors.border,
             borderTopWidth: 1,
           }}
         >
+          <Pressable onPress={() => setShowEmoji((s) => !s)} hitSlop={6} style={{ padding: 4 }}>
+            <Ionicons name="happy-outline" size={26} color={showEmoji ? colors.primary : colors.muted} />
+          </Pressable>
+          <Pressable onPress={pickImage} disabled={uploading} hitSlop={6} style={{ padding: 4 }}>
+            <Ionicons name="image-outline" size={26} color={colors.muted} />
+          </Pressable>
+          <Pressable onPress={toggleRecord} disabled={uploading} hitSlop={6} style={{ padding: 4 }}>
+            <Ionicons name={recording ? "stop-circle" : "mic-outline"} size={26} color={recording ? colors.danger : colors.muted} />
+          </Pressable>
           <TextInput
             value={body}
             onChangeText={setBody}
-            placeholder="Mesaj yaz…"
+            placeholder={recording ? "Kaydediliyor…" : "Mesaj yaz…"}
             placeholderTextColor={colors.muted}
+            editable={!recording}
+            onFocus={() => setShowEmoji(false)}
             style={{
               flex: 1,
               borderWidth: 1,
@@ -344,6 +483,48 @@ function ChatHeaderTitle({ id, name, avatar }: { id: string; name: string; avata
       <Text style={{ fontSize: 17, fontWeight: "700", color: colors.text }} numberOfLines={1}>
         {name}
       </Text>
+    </Pressable>
+  );
+}
+
+function AudioBubble({ uri, mine }: { uri: string; mine: boolean }) {
+  const player = useAudioPlayer(uri);
+  const status = useAudioPlayerStatus(player);
+  const playing = status.playing;
+
+  function toggle() {
+    if (status.playing) {
+      player.pause();
+    } else {
+      if (status.didJustFinish || (status.duration > 0 && status.currentTime >= status.duration)) {
+        player.seekTo(0);
+      }
+      player.play();
+    }
+  }
+
+  return (
+    <Pressable
+      onPress={toggle}
+      style={{
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 10,
+        backgroundColor: mine ? colors.primary : "#EFEFF2",
+        borderRadius: 16,
+        borderBottomRightRadius: mine ? 4 : 16,
+        borderBottomLeftRadius: mine ? 16 : 4,
+        paddingHorizontal: 14,
+        paddingVertical: 10,
+        minWidth: 140,
+      }}
+    >
+      <Ionicons
+        name={playing ? "pause" : "play"}
+        size={22}
+        color={mine ? "#fff" : colors.primary}
+      />
+      <Text style={{ color: mine ? "#fff" : colors.text, fontSize: 14 }}>Sesli mesaj</Text>
     </Pressable>
   );
 }

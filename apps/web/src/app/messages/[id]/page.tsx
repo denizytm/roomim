@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, ChevronDown } from "lucide-react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Chat } from "@/features/messages/chat";
@@ -23,42 +23,41 @@ export default async function ConversationPage({
 
   return (
     <div className="mx-auto w-full max-w-2xl px-4 py-6">
-      <div className="mb-4 flex items-center justify-between gap-3">
-        <div className="min-w-0">
+      <div className="mb-4 flex items-center gap-3">
+        <Link
+          href="/messages"
+          aria-label="Mesajlara dön"
+          className="shrink-0 text-muted-foreground transition-colors hover:text-foreground"
+        >
+          <ArrowLeft className="size-5" />
+        </Link>
+        {data.other ? (
           <Link
-            href="/messages"
-            className="mb-1 inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
+            href={`/u/${data.other.id}`}
+            className="group flex min-w-0 items-center gap-2.5"
           >
-            <ArrowLeft className="size-4" /> Mesajlar
+            <Avatar className="size-9 shrink-0">
+              {publicImageUrl(AVATAR_BUCKET, data.other.avatar_url) && (
+                <AvatarImage
+                  src={publicImageUrl(AVATAR_BUCKET, data.other.avatar_url)!}
+                  alt={data.other.full_name ?? ""}
+                />
+              )}
+              <AvatarFallback>
+                {(data.other.full_name ?? "?").slice(0, 1).toUpperCase()}
+              </AvatarFallback>
+            </Avatar>
+            <h1 className="truncate text-lg font-bold tracking-tight group-hover:text-primary">
+              {data.other.full_name ?? "Kullanıcı"}
+            </h1>
           </Link>
-          {data.other ? (
-            <Link
-              href={`/u/${data.other.id}`}
-              className="group inline-flex items-center gap-2.5"
-            >
-              <Avatar className="size-9">
-                {publicImageUrl(AVATAR_BUCKET, data.other.avatar_url) && (
-                  <AvatarImage
-                    src={publicImageUrl(AVATAR_BUCKET, data.other.avatar_url)!}
-                    alt={data.other.full_name ?? ""}
-                  />
-                )}
-                <AvatarFallback>
-                  {(data.other.full_name ?? "?").slice(0, 1).toUpperCase()}
-                </AvatarFallback>
-              </Avatar>
-              <h1 className="truncate text-xl font-bold tracking-tight group-hover:text-primary">
-                {data.other.full_name ?? "Kullanıcı"}
-              </h1>
-            </Link>
-          ) : (
-            <h1 className="truncate text-xl font-bold tracking-tight">Kullanıcı</h1>
-          )}
-        </div>
+        ) : (
+          <h1 className="truncate text-lg font-bold tracking-tight">Kullanıcı</h1>
+        )}
         {data.listing && (
           <Link
             href={`/listings/${data.listing.id}`}
-            className="shrink-0 text-sm font-medium text-primary hover:underline"
+            className="ml-auto shrink-0 text-sm font-medium text-primary hover:underline"
           >
             İlanı gör
           </Link>
@@ -66,13 +65,14 @@ export default async function ConversationPage({
       </div>
 
       {data.otherAnswers.length > 0 && (
-        <details
-          className="group mb-4 rounded-2xl border border-border bg-card p-4"
-          open
-        >
-          <summary className="flex cursor-pointer list-none items-center justify-between gap-2 font-medium">
-            <span>
+        <details className="group mb-4 rounded-2xl border border-border bg-card p-4 transition-colors hover:border-primary/40">
+          <summary className="flex cursor-pointer list-none items-center justify-between gap-2">
+            <span className="flex items-center gap-2 font-medium">
+              <ChevronDown className="size-4 text-primary transition-transform group-open:rotate-180" />
               {data.isHost ? "İsteyen kişinin" : "Karşı tarafın"} uyum profili
+              <span className="text-xs font-normal text-muted-foreground">
+                · detayları göster
+              </span>
             </span>
             {data.otherScore != null && <CompatibilityBadge score={data.otherScore} />}
           </summary>
