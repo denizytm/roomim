@@ -195,8 +195,27 @@ export default function ChatScreen() {
         behavior={Platform.OS === "ios" ? "padding" : undefined}
         keyboardVerticalOffset={90}
       >
-        {/* Üst: (host) ilanı kapat + uyum profili */}
+        {/* Üst: ilgili ilan + (host) ilanı kapat + uyum profili */}
         <View style={{ borderBottomColor: colors.border, borderBottomWidth: 1 }}>
+          {detail.listingId && (
+            <Pressable
+              onPress={() => router.push(`/listing/${detail.listingId}` as Href)}
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                gap: 8,
+                paddingHorizontal: 12,
+                paddingVertical: 10,
+                backgroundColor: colors.surface,
+              }}
+            >
+              <Text style={{ fontSize: 16 }}>🏠</Text>
+              <Text style={{ flex: 1, color: colors.text, fontWeight: "600" }} numberOfLines={1}>
+                {detail.listingTitle ?? "İlan"}
+              </Text>
+              <Text style={{ color: colors.primary, fontWeight: "700", fontSize: 13 }}>İlana git ›</Text>
+            </Pressable>
+          )}
           {detail.isHost && detail.listingStatus !== "closed" && (
             <Pressable onPress={close} disabled={busy} style={{ paddingHorizontal: 10, paddingBottom: 8 }}>
               <Text style={{ color: colors.primary, fontWeight: "700", fontSize: 13 }}>
