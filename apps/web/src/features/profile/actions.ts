@@ -51,24 +51,23 @@ export async function saveOnboardingAction(input: {
   role: "host" | "seeker";
   answers: Record<string, number>;
 }): Promise<{ error?: string }> {
+  // Uyum soruları opsiyonel: kısmi ya da boş bırakılabilir.
   const entries = Object.entries(input.answers);
-  if (entries.length !== 15) {
-    return { error: "Lütfen tüm soruları yanıtla." };
-  }
-
   const { supabase, user } = await requireUser();
 
-  const rows = entries.map(([questionId, value]) => ({
-    user_id: user.id,
-    question_id: Number(questionId),
-    value,
-  }));
+  if (entries.length > 0) {
+    const rows = entries.map(([questionId, value]) => ({
+      user_id: user.id,
+      question_id: Number(questionId),
+      value,
+    }));
 
-  const { error: answersError } = await supabase
-    .from("compatibility_answers")
-    .upsert(rows, { onConflict: "user_id,question_id" });
+    const { error: answersError } = await supabase
+      .from("compatibility_answers")
+      .upsert(rows, { onConflict: "user_id,question_id" });
 
-  if (answersError) return { error: answersError.message };
+    if (answersError) return { error: answersError.message };
+  }
 
   const { error: profileError } = await supabase
     .from("profiles")
