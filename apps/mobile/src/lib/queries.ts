@@ -465,7 +465,7 @@ export type ChatDetail = {
   district: string | null;
   messages: ChatMessage[];
   otherScore: number | null;
-  otherAnswers: { question: string; answer: string }[];
+  otherAnswers: { question: string; answer: string; category: string }[];
 };
 
 export async function getConversationDetail(
@@ -499,20 +499,26 @@ export async function getConversationDetail(
     ]);
 
   let otherScore: number | null = null;
-  let otherAnswers: { question: string; answer: string }[] = [];
+  let otherAnswers: { question: string; answer: string; category: string }[] = [];
   if (rawAnswers && rawAnswers.length > 0) {
-    const [{ data: scores }, { data: questions }] = await Promise.all([
+    const [{ data: scores }, { data: questions }, { data: cats }] = await Promise.all([
       supabase.rpc("compatibility_scores", { other_users: [otherId] }),
       supabase.from("compatibility_questions").select("*").order("position"),
+      supabase.from("compatibility_categories").select("id, name"),
     ]);
     otherScore = scores?.[0]?.score ?? null;
     const vMap = new Map(rawAnswers.map((a) => [a.question_id, a.value]));
+    const catMap = new Map((cats ?? []).map((c) => [c.id, c.name]));
     otherAnswers = (questions ?? [])
       .filter((q) => vMap.has(q.id))
       .map((q) => {
         const opts = q.options as unknown as QuestionOption[];
         const v = vMap.get(q.id);
-        return { question: q.question, answer: opts.find((o) => o.value === v)?.label ?? String(v) };
+        return {
+          question: q.question,
+          answer: opts.find((o) => o.value === v)?.label ?? String(v),
+          category: catMap.get(q.category_id) ?? "",
+        };
       });
   }
 

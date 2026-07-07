@@ -10,7 +10,7 @@ import {
 import { Image } from "expo-image";
 import * as ImagePicker from "expo-image-picker";
 import { router, Stack, useLocalSearchParams, type Href } from "expo-router";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -225,7 +225,7 @@ export default function ChatScreen() {
               {detail.otherScore != null && (
                 <Text style={{ color: colors.primary, fontWeight: "800" }}>%{detail.otherScore} uyum</Text>
               )}
-              <CompatList answers={detail.otherAnswers} />
+              <CompatPager answers={detail.otherAnswers} />
               <View style={{ flexDirection: "row", gap: 12, marginTop: 8 }}>
                 <Pressable
                   onPress={() => changeStatus("accepted")}
@@ -323,7 +323,7 @@ export default function ChatScreen() {
                   %{detail.otherScore} uyum
                 </Text>
               )}
-              <CompatList answers={detail.otherAnswers} />
+              <CompatPager answers={detail.otherAnswers} />
             </View>
           )}
         </View>
@@ -529,16 +529,100 @@ function AudioBubble({ uri, mine }: { uri: string; mine: boolean }) {
   );
 }
 
-function CompatList({ answers }: { answers: { question: string; answer: string }[] }) {
+type CompatAnswer = { question: string; answer: string; category: string };
+
+function CompatPager({ answers }: { answers: CompatAnswer[] }) {
+  const [width, setWidth] = useState(0);
+  const [page, setPage] = useState(0);
+  const scrollRef = useRef<ScrollView>(null);
+
+  const groups = useMemo(() => {
+    const map = new Map<string, { question: string; answer: string }[]>();
+    for (const a of answers) {
+      const arr = map.get(a.category) ?? [];
+      arr.push({ question: a.question, answer: a.answer });
+      map.set(a.category, arr);
+    }
+    return [...map.entries()].map(([category, items]) => ({ category, items }));
+  }, [answers]);
+
   if (answers.length === 0) return null;
+
+  function goTo(i: number) {
+    setPage(i);
+    scrollRef.current?.scrollTo({ x: i * width, animated: true });
+  }
+
   return (
-    <View style={{ width: "100%", gap: 6, marginTop: 6 }}>
-      {answers.map((a, i) => (
-        <View key={i} style={{ flexDirection: "row", justifyContent: "space-between", gap: 10 }}>
-          <Text style={{ color: colors.muted, fontSize: 12, flex: 1 }}>{a.question}</Text>
-          <Text style={{ color: colors.text, fontSize: 12, fontWeight: "600" }}>{a.answer}</Text>
-        </View>
-      ))}
+    <View
+      style={{ width: "100%", marginTop: 6 }}
+      onLayout={(e) => setWidth(e.nativeEvent.layout.width)}
+    >
+      {/* Kategori sekmeleri */}
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={{ gap: 8, paddingBottom: 10 }}
+      >
+        {groups.map((g, i) => (
+          <Pressable
+            key={g.category}
+            onPress={() => goTo(i)}
+            style={{
+              paddingHorizontal: 12,
+              paddingVertical: 6,
+              borderRadius: 999,
+              backgroundColor: i === page ? colors.primary : colors.surface,
+            }}
+          >
+            <Text style={{ color: i === page ? "#fff" : colors.text, fontWeight: "700", fontSize: 12 }}>
+              {g.category}
+            </Text>
+          </Pressable>
+        ))}
+      </ScrollView>
+
+      {/* Soldan sağa kaydırmalı sayfalar */}
+      {width > 0 && (
+        <ScrollView
+          ref={scrollRef}
+          horizontal
+          pagingEnabled
+          showsHorizontalScrollIndicator={false}
+          onMomentumScrollEnd={(e) =>
+            setPage(Math.round(e.nativeEvent.contentOffset.x / width))
+          }
+        >
+          {groups.map((g) => (
+            <View key={g.category} style={{ width, gap: 10 }}>
+              {g.items.map((a, i) => (
+                <View
+                  key={i}
+                  style={{ borderLeftWidth: 2, borderLeftColor: colors.primary + "33", paddingLeft: 10, gap: 2 }}
+                >
+                  <Text style={{ color: colors.muted, fontSize: 12 }}>{a.question}</Text>
+                  <Text style={{ color: colors.text, fontSize: 14, fontWeight: "700" }}>{a.answer}</Text>
+                </View>
+              ))}
+            </View>
+          ))}
+        </ScrollView>
+      )}
+
+      {/* Nokta göstergesi */}
+      <View style={{ flexDirection: "row", justifyContent: "center", gap: 6, marginTop: 10 }}>
+        {groups.map((g, i) => (
+          <View
+            key={g.category}
+            style={{
+              width: i === page ? 16 : 6,
+              height: 6,
+              borderRadius: 3,
+              backgroundColor: i === page ? colors.primary : colors.border,
+            }}
+          />
+        ))}
+      </View>
     </View>
   );
 }
