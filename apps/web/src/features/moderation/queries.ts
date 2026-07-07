@@ -17,6 +17,48 @@ export type BannedUser = {
   bannedUntil: string | null;
 };
 
+export type AdminListing = {
+  id: string;
+  title: string;
+  ownerId: string;
+  ownerName: string;
+  city: string;
+  district: string;
+  monthlyRent: number;
+  status: string;
+  createdAt: string;
+};
+
+// Adminler için tüm ilanlar (RLS: is_admin() hepsini görür).
+export async function getAllListingsForAdmin(): Promise<AdminListing[]> {
+  const supabase = await createClient();
+  const { data: listings } = await supabase
+    .from("listings")
+    .select("id, title, owner_id, city, district, monthly_rent, status, created_at")
+    .order("created_at", { ascending: false });
+
+  if (!listings?.length) return [];
+
+  const ownerIds = [...new Set(listings.map((l) => l.owner_id))];
+  const { data: profs } = await supabase
+    .from("profiles")
+    .select("id, full_name")
+    .in("id", ownerIds);
+  const pm = new Map((profs ?? []).map((p) => [p.id, p.full_name]));
+
+  return listings.map((l) => ({
+    id: l.id,
+    title: l.title,
+    ownerId: l.owner_id,
+    ownerName: pm.get(l.owner_id) ?? "Kullanıcı",
+    city: l.city,
+    district: l.district,
+    monthlyRent: l.monthly_rent,
+    status: l.status,
+    createdAt: l.created_at,
+  }));
+}
+
 export async function getBannedUsers(): Promise<BannedUser[]> {
   const supabase = await createClient();
   const { data } = await supabase

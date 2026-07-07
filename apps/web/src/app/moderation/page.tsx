@@ -10,7 +10,12 @@ import {
   dismissReportAction,
   unbanUserAction,
 } from "@/features/moderation/actions";
-import { getBannedUsers, getOpenReports } from "@/features/moderation/queries";
+import { AdminListings } from "@/features/moderation/admin-listings";
+import {
+  getAllListingsForAdmin,
+  getBannedUsers,
+  getOpenReports,
+} from "@/features/moderation/queries";
 import { requireOnboardedProfile } from "@/lib/auth";
 import { isEffectivelyBanned } from "@/lib/ban";
 import { formatDate } from "@/lib/format";
@@ -44,7 +49,11 @@ export default async function ModerationPage() {
   const profile = await requireOnboardedProfile();
   if (!profile.is_admin) notFound();
 
-  const [reports, banned] = await Promise.all([getOpenReports(), getBannedUsers()]);
+  const [reports, banned, listings] = await Promise.all([
+    getOpenReports(),
+    getBannedUsers(),
+    getAllListingsForAdmin(),
+  ]);
 
   return (
     <div className="mx-auto w-full max-w-3xl px-4 py-8">
@@ -105,6 +114,14 @@ export default async function ModerationPage() {
           ))}
         </div>
       )}
+
+      {/* İlanlar */}
+      <h2 className="mt-10 mb-3 font-semibold">İlanlar ({listings.length})</h2>
+      <p className="mb-3 text-sm text-muted-foreground">
+        Gizle = listelerden kaldırır (pasife alır). Kapat = ilanı kapatır. Sil = sistemden
+        tamamen kaldırır (geri alınamaz).
+      </p>
+      <AdminListings listings={listings} />
 
       {/* Yasaklı kullanıcılar */}
       <h2 className="mt-10 mb-3 font-semibold">Yasaklı kullanıcılar ({banned.length})</h2>

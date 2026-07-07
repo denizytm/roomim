@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 
 import { requireUser } from "@/lib/auth";
+import type { ListingStatus } from "@/lib/types/database.types";
 
 export type ReportState = { error?: string; success?: boolean } | null;
 
@@ -60,5 +61,34 @@ export async function unbanUserAction(formData: FormData) {
   const target = formData.get("userId") as string;
   const { supabase } = await requireUser();
   await supabase.rpc("unban_user", { target });
+  revalidatePath("/moderation");
+}
+
+async function requireAdmin() {
+  const { supabase, user } = await requireUser();
+  const { data } = await supabase
+    .from("profiles")
+    .select("is_admin")
+    .eq("id", user.id)
+    .maybeSingle();
+  if (!data?.is_admin) throw new Error("Yetkisiz");
+  return { supabase };
+}
+
+// Admin: ilan durumunu değiştir (gizle=passive / yayına al=active / kapat=closed)
+export async function adminSetListingStatusAction(formData: FormData) {
+  const id = formData.get("id") as string;
+  const status = formData.get("status") as ListingStatus;
+  const { supabase } = await requireAdmin();
+  await supabase.from("listings").update({ status }).eq("id", id);
+  revalidatePath("/moderation");
+  revalidatePath(`/listings/${id}`);
+}
+
+// Admin: ilanı sistemden tamamen sil (foto/konuşma/mesaj cascade ile gider)
+export async function adminDeleteListingAction(formData: FormData) {
+  const id = formData.get("id") as string;
+  const { supabase } = await requireAdmin();
+  await supabase.from("listings").delete().eq("id", id);
   revalidatePath("/moderation");
 }
