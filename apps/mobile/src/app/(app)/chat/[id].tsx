@@ -195,12 +195,8 @@ export default function ChatScreen() {
         behavior={Platform.OS === "ios" ? "padding" : undefined}
         keyboardVerticalOffset={90}
       >
-        {/* Üst: kafe önerisi + (host) kapat + uyum profili */}
+        {/* Üst: (host) ilanı kapat + uyum profili */}
         <View style={{ borderBottomColor: colors.border, borderBottomWidth: 1 }}>
-          <Text style={{ color: colors.muted, fontSize: 12, padding: 10, paddingBottom: 6 }}>
-            ☕ İlk buluşma için {detail.district ? `${detail.district}'te ` : ""}yakın bir kafeyi öner. Ev
-            adresini ancak tanıştıktan sonra paylaş.
-          </Text>
           {detail.isHost && detail.listingStatus !== "closed" && (
             <Pressable onPress={close} disabled={busy} style={{ paddingHorizontal: 10, paddingBottom: 8 }}>
               <Text style={{ color: colors.primary, fontWeight: "700", fontSize: 13 }}>

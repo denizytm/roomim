@@ -93,7 +93,6 @@ export default async function ConversationPage({
         isHost={data.isHost}
         status={data.conversation.status}
         otherName={data.other?.full_name ?? "Kullanıcı"}
-        district={data.listing?.district ?? null}
         listingId={data.listing?.id ?? null}
         listingStatus={data.listing?.status ?? null}
         initialMessages={data.messages}

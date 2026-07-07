@@ -1,16 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, useTransition } from "react";
-import {
-  Check,
-  Coffee,
-  Loader2,
-  MapPin,
-  PartyPopper,
-  Send,
-  ShieldAlert,
-  X,
-} from "lucide-react";
+import { Check, Loader2, MapPin, PartyPopper, Send, ShieldAlert, X } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -27,7 +18,6 @@ type Props = {
   isHost: boolean;
   status: ConversationStatus;
   otherName: string;
-  district: string | null;
   listingId: string | null;
   listingStatus: string | null;
   initialMessages: Message[];
@@ -39,7 +29,6 @@ export function Chat({
   isHost,
   status,
   otherName,
-  district,
   listingId,
   listingStatus,
   initialMessages,
@@ -207,15 +196,6 @@ export function Chat({
           </Button>
         </form>
       )}
-
-      {/* Kafe önerisi */}
-      <div className="flex items-start gap-2 border-b border-border bg-accent/40 px-4 py-3 text-sm">
-        <Coffee className="mt-0.5 size-4 shrink-0 text-primary" />
-        <p className="text-muted-foreground">
-          İlk buluşma için {district ? `${district}'te ` : ""}yakın bir kafede
-          görüşmenizi öneririz. Güvenliğin için ev adresini ancak tanıştıktan sonra paylaş.
-        </p>
-      </div>
 
       {/* Mesajlar */}
       <div className="flex-1 space-y-2 overflow-y-auto p-4">
