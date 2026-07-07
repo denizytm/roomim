@@ -21,6 +21,14 @@ export default async function ConversationPage({
   const data = await getConversation(id, profile.id);
   if (!data) notFound();
 
+  // Uyum cevaplarını kategoriye göre grupla (soru sırası kategori sırasını korur).
+  const groupedAnswers = data.otherAnswers.reduce<
+    Record<string, { question: string; answer: string }[]>
+  >((acc, a) => {
+    (acc[a.category] ??= []).push({ question: a.question, answer: a.answer });
+    return acc;
+  }, {});
+
   return (
     <div className="mx-auto w-full max-w-2xl px-4 py-6">
       <div className="mb-4 flex items-center gap-3">
@@ -65,8 +73,8 @@ export default async function ConversationPage({
       </div>
 
       {data.otherAnswers.length > 0 && (
-        <details className="group mb-4 rounded-2xl border border-border bg-card p-4 transition-colors hover:border-primary/40">
-          <summary className="flex cursor-pointer list-none items-center justify-between gap-2">
+        <details className="group mb-4 overflow-hidden rounded-2xl border border-border bg-card transition-colors hover:border-primary/40">
+          <summary className="flex cursor-pointer list-none items-center justify-between gap-2 p-4">
             <span className="flex items-center gap-2 font-medium">
               <ChevronDown className="size-4 text-primary transition-transform group-open:rotate-180" />
               {data.isHost ? "İsteyen kişinin" : "Karşı tarafın"} uyum profili
@@ -76,14 +84,25 @@ export default async function ConversationPage({
             </span>
             {data.otherScore != null && <CompatibilityBadge score={data.otherScore} />}
           </summary>
-          <ul className="mt-3 space-y-2 border-t border-border pt-3">
-            {data.otherAnswers.map((a, i) => (
-              <li key={i} className="flex items-start justify-between gap-3 text-sm">
-                <span className="text-muted-foreground">{a.question}</span>
-                <span className="shrink-0 font-medium">{a.answer}</span>
-              </li>
+          <div className="space-y-6 border-t border-border p-5">
+            {Object.entries(groupedAnswers).map(([category, items]) => (
+              <div key={category}>
+                <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-primary/70">
+                  {category}
+                </p>
+                <div className="grid gap-x-8 gap-y-4 sm:grid-cols-2">
+                  {items.map((a, i) => (
+                    <div key={i} className="flex flex-col gap-1 border-l-2 border-primary/15 pl-3">
+                      <span className="text-xs leading-snug text-muted-foreground">
+                        {a.question}
+                      </span>
+                      <span className="text-sm font-semibold text-foreground">{a.answer}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
             ))}
-          </ul>
+          </div>
         </details>
       )}
 
