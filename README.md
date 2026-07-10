@@ -1,4 +1,4 @@
-# hoomies
+# Roomim
 
 Üniversite öğrencileri için güvenli ev arkadaşı eşleşme platformu. Edu mail doğrulaması,
 uyum skoru ve ilan sistemiyle. Bu repo **web** uygulamasıdır (wg-gesucht tarzı ilan odaklı);

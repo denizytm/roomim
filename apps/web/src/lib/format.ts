@@ -1,1 +1,1 @@
-export * from "@hoomies/shared/format";
+export * from "@roomim/shared/format";

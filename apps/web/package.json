@@ -1,5 +1,5 @@
 {
-  "name": "@hoomies/web",
+  "name": "@roomim/web",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -10,7 +10,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@hoomies/shared": "*",
+    "@roomim/shared": "*",
     "@base-ui/react": "^1.5.0",
     "@hookform/resolvers": "^5.4.0",
     "@supabase/ssr": "^0.12.0",

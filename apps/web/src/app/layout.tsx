@@ -20,8 +20,8 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "hoomies — Üniversiteli ev arkadaşı eşleşmesi",
-    template: "%s · hoomies",
+    default: "Roomim — Üniversiteli ev arkadaşı eşleşmesi",
+    template: "%s · Roomim",
   },
   description:
     "Edu mail ile doğrulanmış, uyum skoruyla eşleşen güvenli ev arkadaşı platformu.",

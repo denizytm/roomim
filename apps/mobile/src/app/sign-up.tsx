@@ -1,4 +1,4 @@
-import { emailDomain, registerSchema } from "@hoomies/shared/validation/auth";
+import { emailDomain, registerSchema } from "@roomim/shared/validation/auth";
 import { Link, router } from "expo-router";
 import { useState } from "react";
 import {

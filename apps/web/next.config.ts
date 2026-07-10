@@ -1,7 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  transpilePackages: ["@hoomies/shared"],
+  transpilePackages: ["@roomim/shared"],
   images: {
     remotePatterns: [
       { protocol: "https", hostname: "*.supabase.co" },

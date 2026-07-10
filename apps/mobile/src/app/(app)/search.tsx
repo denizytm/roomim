@@ -1,4 +1,4 @@
-import { CITIES, districtsFor } from "@hoomies/shared/data/locations";
+import { CITIES, districtsFor } from "@roomim/shared/data/locations";
 import { useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,

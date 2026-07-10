@@ -2,12 +2,12 @@ import {
   GENDER_PREFERENCE_OPTIONS,
   LISTING_FEATURES,
   PHOTO_CATEGORIES,
-} from "@hoomies/shared/constants";
-import { CITIES, districtsFor } from "@hoomies/shared/data/locations";
+} from "@roomim/shared/constants";
+import { CITIES, districtsFor } from "@roomim/shared/data/locations";
 import {
   listingFormSchema,
   validateCategorizedPhotos,
-} from "@hoomies/shared/validation/listing";
+} from "@roomim/shared/validation/listing";
 import { Image } from "expo-image";
 import * as ImagePicker from "expo-image-picker";
 import { router } from "expo-router";

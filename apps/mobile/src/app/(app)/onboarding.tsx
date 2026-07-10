@@ -1,9 +1,9 @@
-import { ROLE_DESCRIPTIONS, ROLE_LABELS } from "@hoomies/shared/constants";
+import { ROLE_DESCRIPTIONS, ROLE_LABELS } from "@roomim/shared/constants";
 import type {
   CompatibilityCategory,
   CompatibilityQuestion,
   UserRole,
-} from "@hoomies/shared/types/database.types";
+} from "@roomim/shared/types/database.types";
 import { useEffect, useState } from "react";
 import { ActivityIndicator, Pressable, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";

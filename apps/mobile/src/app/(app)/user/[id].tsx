@@ -1,6 +1,6 @@
-import { ROLE_LABELS } from "@hoomies/shared/constants";
-import { computeBadges } from "@hoomies/shared/loyalty";
-import type { Profile, UserRole } from "@hoomies/shared/types/database.types";
+import { ROLE_LABELS } from "@roomim/shared/constants";
+import { computeBadges } from "@roomim/shared/loyalty";
+import type { Profile, UserRole } from "@roomim/shared/types/database.types";
 import { Image } from "expo-image";
 import { useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";

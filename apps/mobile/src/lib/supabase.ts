@@ -3,7 +3,7 @@ import "react-native-url-polyfill/auto";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { createClient } from "@supabase/supabase-js";
 
-import type { Database } from "@hoomies/shared/types/database.types";
+import type { Database } from "@roomim/shared/types/database.types";
 
 export const supabase = createClient<Database>(
   process.env.EXPO_PUBLIC_SUPABASE_URL!,

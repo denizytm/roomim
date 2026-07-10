@@ -49,7 +49,7 @@
 }
 
 :root {
-  /* Hoomies brand: warm orange primary on a clean white/stone surface. */
+  /* Roomim brand: warm orange primary on a clean white/stone surface. */
   --background: oklch(0.995 0.003 60);
   --foreground: oklch(0.21 0.02 50);
   --card: oklch(1 0 0);

@@ -45,7 +45,7 @@ export default function DeckScreen() {
           paddingVertical: 12,
         }}
       >
-        <Text style={{ fontSize: 22, fontWeight: "800", color: colors.primary }}>hoomies</Text>
+        <Text style={{ fontSize: 22, fontWeight: "800", color: colors.primary }}>Roomim</Text>
         <Pressable onPress={() => router.push("/search" as Href)} hitSlop={8}>
           <Ionicons name="search-outline" size={24} color={colors.text} />
         </Pressable>

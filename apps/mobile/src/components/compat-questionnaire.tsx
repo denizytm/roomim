@@ -2,7 +2,7 @@ import type {
   CompatibilityCategory,
   CompatibilityQuestion,
   QuestionOption,
-} from "@hoomies/shared/types/database.types";
+} from "@roomim/shared/types/database.types";
 import { useState } from "react";
 import { Alert, Pressable, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";

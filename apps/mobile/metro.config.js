@@ -12,7 +12,7 @@ config.resolver.nodeModulesPaths = [
   path.resolve(projectRoot, "node_modules"),
   path.resolve(workspaceRoot, "node_modules"),
 ];
-// @hoomies/shared "exports" alanını (TS kaynak) çözebilmek için.
+// @roomim/shared "exports" alanını (TS kaynak) çözebilmek için.
 config.resolver.unstable_enablePackageExports = true;
 
 module.exports = config;

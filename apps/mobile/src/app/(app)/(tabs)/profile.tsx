@@ -1,6 +1,6 @@
-import { ROLE_LABELS } from "@hoomies/shared/constants";
-import { computeBadges } from "@hoomies/shared/loyalty";
-import type { UserRole } from "@hoomies/shared/types/database.types";
+import { ROLE_LABELS } from "@roomim/shared/constants";
+import { computeBadges } from "@roomim/shared/loyalty";
+import type { UserRole } from "@roomim/shared/types/database.types";
 import { router, useFocusEffect, type Href } from "expo-router";
 import { useCallback, useState } from "react";
 import { ActivityIndicator, ScrollView, Text, View } from "react-native";
@@ -10,7 +10,7 @@ import { Btn } from "@/components/form";
 import { useSession } from "@/lib/auth-context";
 import { getProfileFull } from "@/lib/queries";
 import { colors } from "@/lib/theme";
-import type { Profile } from "@hoomies/shared/types/database.types";
+import type { Profile } from "@roomim/shared/types/database.types";
 
 export default function ProfileScreen() {
   const { session, signOut } = useSession();

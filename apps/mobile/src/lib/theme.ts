@@ -1,4 +1,4 @@
-// Hoomies marka renkleri (web ile uyumlu turuncu/beyaz).
+// Roomim marka renkleri (web ile uyumlu turuncu/beyaz).
 export const colors = {
   primary: "#F97316",
   primaryDark: "#EA580C",

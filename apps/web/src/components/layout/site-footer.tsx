@@ -12,7 +12,7 @@ export function SiteFooter() {
           </p>
         </div>
         <p className="text-xs">
-          © {new Date().getFullYear()} hoomies · Kapalı beta · ODTÜ, Ankara
+          © {new Date().getFullYear()} Roomim · Kapalı beta · ODTÜ, Ankara
         </p>
       </div>
     </footer>

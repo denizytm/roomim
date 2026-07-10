@@ -1,1 +1,1 @@
-export * from "@hoomies/shared/validation/listing";
+export * from "@roomim/shared/validation/listing";

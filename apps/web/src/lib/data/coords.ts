@@ -1,1 +1,1 @@
-export * from "@hoomies/shared/data/coords";
+export * from "@roomim/shared/data/coords";

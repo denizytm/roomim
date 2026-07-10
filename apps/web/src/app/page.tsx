@@ -73,7 +73,7 @@ export default function HomePage() {
 
           <FadeIn delay={0.16}>
             <p className="mt-6 max-w-xl text-lg text-muted-foreground text-pretty">
-              hoomies, üniversite öğrencilerini edu mail doğrulaması ve uyum skoruyla
+              Roomim, üniversite öğrencilerini edu mail doğrulaması ve uyum skoruyla
               buluşturan güvenli ev arkadaşı platformudur.
             </p>
           </FadeIn>

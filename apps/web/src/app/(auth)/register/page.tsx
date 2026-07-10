@@ -31,7 +31,7 @@ export default function RegisterPage() {
       <CardHeader>
         <CardTitle className="text-2xl">Kayıt ol</CardTitle>
         <CardDescription>
-          Üniversite (edu) e-postanla hoomies topluluğuna katıl.
+          Üniversite (edu) e-postanla Roomim topluluğuna katıl.
         </CardDescription>
       </CardHeader>
 

@@ -1,1 +1,1 @@
-export * from "@hoomies/shared/types/database.types";
+export * from "@roomim/shared/types/database.types";

@@ -1,15 +1,15 @@
 {
   "expo": {
-    "name": "hoomies",
-    "slug": "hoomies",
+    "name": "Roomim",
+    "slug": "roomim",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "hoomies",
+    "scheme": "roomim",
     "userInterfaceStyle": "automatic",
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.anonymous.hoomies"
+      "bundleIdentifier": "com.anonymous.roomim"
     },
     "android": {
       "adaptiveIcon": {
@@ -19,7 +19,7 @@
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
       "predictiveBackGestureEnabled": false,
-      "package": "com.anonymous.hoomies"
+      "package": "com.anonymous.roomim"
     },
     "web": {
       "output": "static",

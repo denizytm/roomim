@@ -1,1 +1,1 @@
-export * from "@hoomies/shared/constants";
+export * from "@roomim/shared/constants";

@@ -1,5 +1,5 @@
-import { FEATURE_LABELS, GENDER_PREFERENCE_LABELS } from "@hoomies/shared/constants";
-import { formatDate, formatRent } from "@hoomies/shared/format";
+import { FEATURE_LABELS, GENDER_PREFERENCE_LABELS } from "@roomim/shared/constants";
+import { formatDate, formatRent } from "@roomim/shared/format";
 import { Image } from "expo-image";
 import { router, useFocusEffect, useLocalSearchParams, type Href } from "expo-router";
 import { useCallback, useState } from "react";

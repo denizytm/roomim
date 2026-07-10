@@ -1,4 +1,4 @@
-import { daysLeft } from "@hoomies/shared/format";
+import { daysLeft } from "@roomim/shared/format";
 import { Image } from "expo-image";
 import { router, useFocusEffect } from "expo-router";
 import { useCallback, useState } from "react";

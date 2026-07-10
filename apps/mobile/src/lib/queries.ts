@@ -1,4 +1,4 @@
-import { isEffectivelyBanned } from "@hoomies/shared/ban";
+import { isEffectivelyBanned } from "@roomim/shared/ban";
 import type {
   CompatibilityCategory,
   CompatibilityQuestion,
@@ -6,8 +6,8 @@ import type {
   Profile,
   QuestionOption,
   UserRole,
-} from "@hoomies/shared/types/database.types";
-import type { ListingInput } from "@hoomies/shared/validation/listing";
+} from "@roomim/shared/types/database.types";
+import type { ListingInput } from "@roomim/shared/validation/listing";
 
 import { supabase } from "@/lib/supabase";
 import { publicImageUrl } from "@/lib/storage";

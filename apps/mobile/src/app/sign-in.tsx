@@ -60,7 +60,7 @@ export default function SignIn() {
       >
         <ScrollView contentContainerStyle={{ padding: 24, gap: 18, flexGrow: 1, justifyContent: "center" }}>
           <View style={{ gap: 6, marginBottom: 8 }}>
-            <Text style={{ fontSize: 30, fontWeight: "800", color: colors.primary }}>hoomies</Text>
+            <Text style={{ fontSize: 30, fontWeight: "800", color: colors.primary }}>Roomim</Text>
             <Text style={{ color: colors.muted }}>Üniversiteli ev arkadaşı eşleşmesi</Text>
           </View>
 

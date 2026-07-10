@@ -1,12 +1,12 @@
 {
-  "name": "hoomies",
+  "name": "roomim",
   "version": "0.1.0",
   "private": true,
   "workspaces": ["apps/*", "packages/*"],
   "scripts": {
-    "dev": "npm run dev --workspace @hoomies/web",
-    "build": "npm run build --workspace @hoomies/web",
-    "lint": "npm run lint --workspace @hoomies/web",
-    "typecheck": "npm run typecheck --workspace @hoomies/web"
+    "dev": "npm run dev --workspace @roomim/web",
+    "build": "npm run build --workspace @roomim/web",
+    "lint": "npm run lint --workspace @roomim/web",
+    "typecheck": "npm run typecheck --workspace @roomim/web"
   }
 }

@@ -1,7 +1,7 @@
 import type {
   CompatibilityCategory,
   CompatibilityQuestion,
-} from "@hoomies/shared/types/database.types";
+} from "@roomim/shared/types/database.types";
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
 import { ActivityIndicator, View } from "react-native";

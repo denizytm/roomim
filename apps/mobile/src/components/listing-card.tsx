@@ -1,4 +1,4 @@
-import { formatRent } from "@hoomies/shared/format";
+import { formatRent } from "@roomim/shared/format";
 import { Image } from "expo-image";
 import { router, type Href } from "expo-router";
 import { Pressable, Text, View } from "react-native";

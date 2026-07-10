@@ -16,7 +16,7 @@ export function Logo({
         <HousePlus className="size-5" />
       </span>
       <span className="text-lg font-bold tracking-tight text-foreground">
-        hoomies
+        Roomim
       </span>
     </Link>
   );

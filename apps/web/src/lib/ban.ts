@@ -1,1 +1,1 @@
-export * from "@hoomies/shared/ban";
+export * from "@roomim/shared/ban";

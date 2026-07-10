@@ -1,4 +1,4 @@
-import type { UserRole } from "@hoomies/shared/types/database.types";
+import type { UserRole } from "@roomim/shared/types/database.types";
 import type { Session } from "@supabase/supabase-js";
 import {
   createContext,
