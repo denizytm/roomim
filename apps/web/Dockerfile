@@ -9,15 +9,16 @@ FROM node:20-alpine
 WORKDIR /app
 RUN apk add --no-cache libc6-compat
 
-# Workspace manifest'leri önce (katman cache)
+# Sadece web + shared manifest'leri (mobil bağımlılıkları KURMUYORUZ —
+# gereksiz + alpine'de native derleme riski). npm install ile filtreli kurulum.
 COPY package.json package-lock.json ./
 COPY apps/web/package.json apps/web/package.json
-COPY apps/mobile/package.json apps/mobile/package.json
 COPY packages/shared/package.json packages/shared/package.json
-RUN npm ci
+RUN npm install --workspace @roomim/web --workspace @roomim/shared \
+      --include-workspace-root --no-audit --no-fund
 
 # sharp: alpine'de next/image optimizasyonu için (musl prebuilt)
-RUN npm i sharp
+RUN npm i sharp --no-audit --no-fund
 
 # Kaynak
 COPY . .
