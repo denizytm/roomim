@@ -1,0 +1,18 @@
+node_modules
+**/node_modules
+.next
+**/.next
+apps/mobile/android
+apps/mobile/ios
+apps/mobile/.expo
+**/.expo
+.git
+.github
+*.log
+# Yerel env (localhost değerleri) image'a girmesin — env build-arg ile verilir
+.env
+.env.*
+**/.env
+**/.env.*
+.vscode
+.claude
