@@ -11,12 +11,10 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { Btn, Field } from "@/components/form";
-import { useSession } from "@/lib/auth-context";
 import { supabase } from "@/lib/supabase";
 import { colors } from "@/lib/theme";
 
 export default function SignIn() {
-  const { refreshProfile } = useSession();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -29,27 +27,6 @@ export default function SignIn() {
     });
     setLoading(false);
     if (error) Alert.alert("Giriş başarısız", "E-posta veya şifre hatalı.");
-  }
-
-  async function demoLogin() {
-    setLoading(true);
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email: "demo@metu.edu.tr",
-      password: "demodemo123",
-    });
-    if (error || !data.user) {
-      setLoading(false);
-      Alert.alert("Demo", "Demo hesabı bulunamadı. Önce Supabase'de oluştur.");
-      return;
-    }
-    // Web'deki gibi: her demo girişi "ilk kez" gibi başlasın — cevapları sil, onboarding'i sıfırla.
-    await supabase.from("compatibility_answers").delete().eq("user_id", data.user.id);
-    await supabase
-      .from("profiles")
-      .update({ onboarding_completed: false })
-      .eq("id", data.user.id);
-    await refreshProfile();
-    setLoading(false);
   }
 
   return (
@@ -82,7 +59,6 @@ export default function SignIn() {
           />
 
           <Btn title="Giriş yap" onPress={signIn} loading={loading} />
-          <Btn title="Demo hesabıyla gir" onPress={demoLogin} variant="outline" disabled={loading} />
 
           <View style={{ flexDirection: "row", justifyContent: "center", gap: 6, marginTop: 4 }}>
             <Text style={{ color: colors.muted }}>Hesabın yok mu?</Text>

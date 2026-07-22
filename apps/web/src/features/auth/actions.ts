@@ -104,37 +104,6 @@ export async function loginAction(
   redirect(profile?.onboarding_completed ? "/listings" : "/onboarding");
 }
 
-// --- GEÇİCİ: test için demo hesabı girişi. İş bitince bu action + buton kaldırılacak. ---
-const DEMO_EMAIL = "demo@metu.edu.tr";
-const DEMO_PASSWORD = "demodemo123";
-
-export async function demoLoginAction(): Promise<AuthState> {
-  const supabase = await createClient();
-  const {
-    data: { user },
-    error,
-  } = await supabase.auth.signInWithPassword({
-    email: DEMO_EMAIL,
-    password: DEMO_PASSWORD,
-  });
-  if (error || !user) {
-    return {
-      error:
-        "Demo hesabı henüz oluşturulmamış. Supabase'de demo@metu.edu.tr kullanıcısını oluştur.",
-    };
-  }
-
-  // Her demo girişi "ilk kez" gibi başlasın: önceki yanıtları sil, onboarding'i
-  // sıfırla ve uyum sorularına yönlendir.
-  await supabase.from("compatibility_answers").delete().eq("user_id", user.id);
-  await supabase
-    .from("profiles")
-    .update({ onboarding_completed: false })
-    .eq("id", user.id);
-
-  redirect("/onboarding");
-}
-
 export async function signOut() {
   const supabase = await createClient();
   await supabase.auth.signOut();

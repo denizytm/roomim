@@ -1,9 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useActionState, useTransition } from "react";
-import { Loader2, Sparkles } from "lucide-react";
-import { toast } from "sonner";
+import { useActionState } from "react";
+import { Loader2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -16,18 +15,10 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { demoLoginAction, loginAction } from "@/features/auth/actions";
+import { loginAction } from "@/features/auth/actions";
 
 export function LoginForm({ redirectTo }: { redirectTo?: string }) {
   const [state, formAction, pending] = useActionState(loginAction, null);
-  const [demoPending, startDemo] = useTransition();
-
-  function handleDemo() {
-    startDemo(async () => {
-      const res = await demoLoginAction();
-      if (res?.error) toast.error(res.error);
-    });
-  }
 
   return (
     <Card>
@@ -73,22 +64,6 @@ export function LoginForm({ redirectTo }: { redirectTo?: string }) {
           <Button type="submit" size="lg" className="w-full" disabled={pending}>
             {pending && <Loader2 className="animate-spin" />}
             Giriş yap
-          </Button>
-
-          {/* GEÇİCİ: test için demo hesabı girişi. İş bitince kaldırılacak. */}
-          <div className="flex w-full items-center gap-3 text-xs text-muted-foreground">
-            <span className="h-px flex-1 bg-border" /> veya <span className="h-px flex-1 bg-border" />
-          </div>
-          <Button
-            type="button"
-            variant="outline"
-            size="lg"
-            className="w-full"
-            onClick={handleDemo}
-            disabled={demoPending}
-          >
-            {demoPending ? <Loader2 className="animate-spin" /> : <Sparkles />}
-            Demo hesabıyla gir
           </Button>
 
           <p className="text-center text-sm text-muted-foreground">
