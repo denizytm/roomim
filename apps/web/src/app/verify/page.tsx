@@ -1,8 +1,7 @@
-import Link from "next/link";
 import { MailCheck } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { VerifyActions } from "@/features/auth/verify-actions";
 
 export default async function VerifyPage({
   searchParams,
@@ -42,9 +41,10 @@ export default async function VerifyPage({
               Geliştirme: maili görmek için yerel posta kutusunu (Mailpit) aç →
             </a>
           )}
-          <Button variant="outline" className="w-full" render={<Link href="/login" />}>
-            Giriş ekranına dön
-          </Button>
+          <p className="text-sm text-muted-foreground">
+            Mail gelmediyse spam/gereksiz klasörünü kontrol et ya da aşağıdan tekrar gönder.
+          </p>
+          <VerifyActions email={email} />
         </CardContent>
       </Card>
     </div>
