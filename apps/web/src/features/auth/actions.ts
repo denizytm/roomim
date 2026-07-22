@@ -28,21 +28,15 @@ export async function registerAction(
   const { fullName, email, password, role, referralCode } = parsed.data;
   const supabase = await createClient();
 
-  // Pre-check the edu-mail domain for a friendly message. The DB trigger enforces
-  // the same rule as a hard guarantee even if this check is bypassed.
+  // Pre-check: herhangi bir Türk üniversitesi e-postası (.edu.tr) kabul edilir.
+  // DB trigger aynı kuralı zorunlu kılar + bilinmeyen üniversiteyi otomatik oluşturur.
   const domain = emailDomain(email);
   if (!domain) return { error: "Geçerli bir e-posta gir" };
 
-  const { data: uni } = await supabase
-    .from("universities")
-    .select("id")
-    .contains("domains", [domain])
-    .maybeSingle();
-
-  if (!uni) {
+  if (!domain.endsWith(".edu.tr")) {
     return {
       error:
-        "Bu e-posta tanımlı bir üniversite (edu) uzantısı değil. Öğrenci e-postanı kullan.",
+        "Sadece üniversite (.edu.tr) e-postasıyla kayıt olabilirsin. Öğrenci e-postanı kullan.",
     };
   }
 

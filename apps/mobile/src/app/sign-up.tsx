@@ -39,14 +39,9 @@ export default function SignUp() {
     }
     setLoading(true);
     const domain = emailDomain(parsed.data.email);
-    const { data: uni } = await supabase
-      .from("universities")
-      .select("id")
-      .contains("domains", [domain!])
-      .maybeSingle();
-    if (!uni) {
+    if (!domain || !domain.endsWith(".edu.tr")) {
       setLoading(false);
-      Alert.alert("Edu-mail gerekli", "Bu e-posta tanımlı bir üniversite uzantısı değil.");
+      Alert.alert("Edu-mail gerekli", "Sadece üniversite (.edu.tr) e-postasıyla kayıt olabilirsin.");
       return;
     }
     const { error } = await supabase.auth.signUp({
