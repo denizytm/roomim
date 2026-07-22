@@ -53,6 +53,13 @@ export async function registerAction(
     return { error: error.message };
   }
 
+  // Zaten kayıtlı (onaylanmış) e-posta: Supabase güvenlik gereği boş identities döner.
+  if (data.user && Array.isArray(data.user.identities) && data.user.identities.length === 0) {
+    return {
+      error: "Bu e-posta ile zaten bir hesap var. Giriş yap ya da şifreni sıfırla.",
+    };
+  }
+
   // If e-mail confirmation is disabled, signUp returns an active session —
   // skip the "check your email" screen and go straight to onboarding.
   if (data.session) {

@@ -44,7 +44,7 @@ export default function SignUp() {
       Alert.alert("Edu-mail gerekli", "Sadece üniversite (.edu.tr) e-postasıyla kayıt olabilirsin.");
       return;
     }
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email: parsed.data.email,
       password: parsed.data.password,
       options: { data: { full_name: fullName, role } },
@@ -52,6 +52,11 @@ export default function SignUp() {
     setLoading(false);
     if (error) {
       Alert.alert("Kayıt başarısız", error.message);
+      return;
+    }
+    // Zaten kayıtlı (onaylanmış) e-posta: Supabase boş identities döner.
+    if (data.user && Array.isArray(data.user.identities) && data.user.identities.length === 0) {
+      Alert.alert("Hesap zaten var", "Bu e-posta ile zaten bir hesap var. Giriş yapmayı dene.");
       return;
     }
     Alert.alert(
