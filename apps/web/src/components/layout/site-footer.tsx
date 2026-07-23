@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 import { Logo } from "@/components/layout/logo";
 
 export function SiteFooter() {
@@ -11,9 +13,14 @@ export function SiteFooter() {
             doğrulanmış topluluk.
           </p>
         </div>
-        <p className="text-xs">
-          © {new Date().getFullYear()} Roomim · Kapalı beta · ODTÜ, Ankara
-        </p>
+        <div className="flex flex-col gap-2 sm:items-end">
+          <Link href="/gizlilik" className="text-xs font-medium hover:text-foreground">
+            Gizlilik Politikası
+          </Link>
+          <p className="text-xs">
+            © {new Date().getFullYear()} Roomim · Kapalı beta · ODTÜ, Ankara
+          </p>
+        </div>
       </div>
     </footer>
   );
