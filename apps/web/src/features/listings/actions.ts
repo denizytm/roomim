@@ -115,7 +115,11 @@ export async function createListingAction(
   const { error: photoError } = await supabase.from("listing_photos").insert(photoRows);
   if (photoError) return { error: photoError.message };
 
-  redirect(`/listings/${listing.id}`);
+  // Başarılı oluşturmadan sonra kullanıcıyı "İlanlarım"a al ve ilanı hemen göster.
+  // (Ağır harita içeren detay sayfası yerine bu daha hafif ve güvenilir bir hedef.)
+  revalidatePath("/listings/mine");
+  revalidatePath("/listings");
+  redirect("/listings/mine");
 }
 
 // İlanı 30 gün uzat (yenile) — süresi dolmuş/pasif ilanı tekrar aktif eder.
