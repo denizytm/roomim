@@ -1,7 +1,6 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
 
 import { requireUser } from "@/lib/auth";
 import type { ListingStatus } from "@/lib/types/database.types";
@@ -12,7 +11,7 @@ import {
 
 type CategorizedPhoto = { path: string; category: string };
 
-export type ListingState = { error?: string } | null;
+export type ListingState = { error?: string; success?: boolean } | null;
 
 function optNum(v: FormDataEntryValue | null): number | undefined {
   if (v == null || v === "") return undefined;
@@ -115,11 +114,13 @@ export async function createListingAction(
   const { error: photoError } = await supabase.from("listing_photos").insert(photoRows);
   if (photoError) return { error: photoError.message };
 
-  // Başarılı oluşturmadan sonra kullanıcıyı "İlanlarım"a al ve ilanı hemen göster.
-  // (Ağır harita içeren detay sayfası yerine bu daha hafif ve güvenilir bir hedef.)
+  // Redirect'i server action içinde yapmıyoruz: reverse proxy arkasında action
+  // yanıtındaki redirect direktifi ara sıra client'a ulaşmıyordu (form sessizce
+  // sıfırlanıyor, navigasyon olmuyordu). Bunun yerine success dönüyoruz; client
+  // yükleme ekranı gösterip kendi router.push'u ile İlanlarım'a gidiyor.
   revalidatePath("/listings/mine");
   revalidatePath("/listings");
-  redirect("/listings/mine");
+  return { success: true };
 }
 
 // İlanı 30 gün uzat (yenile) — süresi dolmuş/pasif ilanı tekrar aktif eder.

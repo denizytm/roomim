@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState, useEffect, useState } from "react";
-import { Loader2 } from "lucide-react";
+import { CheckCircle2, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -62,7 +62,16 @@ export function ListingForm({ userId }: { userId: string }) {
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   useEffect(() => {
-    if (state?.error) toast.error(state.error);
+    if (state?.error) {
+      toast.error(state.error);
+      return;
+    }
+    if (state?.success) {
+      toast.success("İlanınız oluşturuldu 🎉");
+      // Tam sayfa navigasyon: RSC/soft-navigation proxy arkasında kırılgan; normal
+      // HTML doküman isteği (login gibi) çok daha güvenilir çalışıyor.
+      window.location.assign("/listings/mine");
+    }
   }, [state]);
 
   // Bir alanı güncelle ve o alandaki hatayı temizle (kullanıcı düzeltmeye başladı).
@@ -171,8 +180,47 @@ export function ListingForm({ userId }: { userId: string }) {
   const errCls = (key: string) =>
     errors[key] ? "border-destructive focus-visible:ring-destructive/30" : "";
 
+  const done = state?.success === true;
+  const overlayVisible = pending || done;
+
   return (
     <form onSubmit={onSubmit} className="space-y-6">
+      {overlayVisible && (
+        <div className="fixed inset-0 z-50 flex flex-col items-center justify-center gap-4 bg-background/85 backdrop-blur-sm">
+          {done ? (
+            <>
+              <CheckCircle2 className="size-14 text-primary" />
+              <div className="text-center">
+                <p className="text-lg font-semibold">İlanınız oluşturuldu 🎉</p>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  İlanlarım&apos;a yönlendiriliyorsun…
+                </p>
+                <button
+                  type="button"
+                  onClick={() => window.location.assign("/listings/mine")}
+                  className="mt-3 inline-block text-sm font-medium text-primary hover:underline"
+                >
+                  Otomatik gitmezse buraya dokun
+                </button>
+              </div>
+            </>
+          ) : (
+            <>
+              <span className="relative flex size-14 items-center justify-center">
+                <span className="absolute inline-flex size-full animate-ping rounded-full bg-primary/25" />
+                <Loader2 className="size-10 animate-spin text-primary" />
+              </span>
+              <div className="text-center">
+                <p className="text-lg font-semibold">İlanınız yayınlanıyor…</p>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Fotoğraflar ve bilgiler kaydediliyor, lütfen bekle.
+                </p>
+              </div>
+            </>
+          )}
+        </div>
+      )}
+
       <Section title="Fotoğraflar">
         <CategorizedPhotoUploader userId={userId} value={photos} onChange={setPhotos} />
       </Section>
