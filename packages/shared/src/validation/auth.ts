@@ -17,7 +17,9 @@ export const registerSchema = z.object({
     .string()
     .min(8, "Şifre en az 8 karakter olmalı")
     .max(72, "Şifre çok uzun"),
-  role: roleSchema,
+  // Rol artık kayıt formunda seçilmiyor; onboarding "Nasıl kullanacaksın?"
+  // ekranında belirleniyor. Opsiyonel bırakıldı.
+  role: roleSchema.optional(),
   referralCode: z.string().trim().max(20).optional().or(z.literal("")),
 });
 

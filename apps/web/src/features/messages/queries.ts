@@ -74,6 +74,10 @@ export type CompatibilityAnswerView = {
   question: string;
   answer: string;
   category: string;
+  // Giriş yapan kullanıcının aynı soruya verdiği yanıt (yoksa null).
+  myAnswer: string | null;
+  // Uyum: "high" tam eşleşme, "mid" kısmi, "low" uyumsuz. Biri yanıtlamadıysa null.
+  match: "high" | "mid" | "low" | null;
 };
 
 export type ConversationDetail = {
@@ -129,24 +133,41 @@ export async function getConversation(
   let otherAnswers: CompatibilityAnswerView[] = [];
 
   if (rawAnswers && rawAnswers.length > 0) {
-    const [{ data: scores }, { data: questions }, { data: cats }] = await Promise.all([
-      supabase.rpc("compatibility_scores", { other_users: [otherId] }),
-      supabase.from("compatibility_questions").select("*").order("position"),
-      supabase.from("compatibility_categories").select("*"),
-    ]);
+    const [{ data: scores }, { data: questions }, { data: cats }, { data: myRaw }] =
+      await Promise.all([
+        supabase.rpc("compatibility_scores", { other_users: [otherId] }),
+        supabase.from("compatibility_questions").select("*").order("position"),
+        supabase.from("compatibility_categories").select("*"),
+        // Kendi uyum yanıtlarım (RLS: sadece kendi satırlarım).
+        supabase
+          .from("compatibility_answers")
+          .select("question_id, value")
+          .eq("user_id", userId),
+      ]);
     otherScore = scores?.[0]?.score ?? null;
 
     const valueMap = new Map(rawAnswers.map((a) => [a.question_id, a.value]));
+    const myMap = new Map((myRaw ?? []).map((a) => [a.question_id, a.value]));
     const catMap = new Map((cats ?? []).map((c) => [c.id, c.name]));
     otherAnswers = (questions ?? [])
       .filter((q) => valueMap.has(q.id))
       .map((q) => {
         const opts = (q.options as QuestionOption[]) ?? [];
         const v = valueMap.get(q.id);
+        const mine = myMap.get(q.id);
+        // Puanlamayla aynı mantık: |onun - benim| → 0 tam, 1 kısmi, 2 uyumsuz.
+        let match: CompatibilityAnswerView["match"] = null;
+        if (mine != null && v != null) {
+          const diff = Math.abs(Number(v) - Number(mine));
+          match = diff === 0 ? "high" : diff === 1 ? "mid" : "low";
+        }
         return {
           question: q.question,
           answer: opts.find((o) => o.value === v)?.label ?? String(v),
           category: catMap.get(q.category_id) ?? "",
+          myAnswer:
+            mine != null ? opts.find((o) => o.value === mine)?.label ?? String(mine) : null,
+          match,
         };
       });
   }

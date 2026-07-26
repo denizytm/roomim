@@ -23,11 +23,17 @@ export default async function ConversationPage({
 
   // Uyum cevaplarını kategoriye göre grupla (soru sırası kategori sırasını korur).
   const groupedAnswers = data.otherAnswers.reduce<
-    Record<string, { question: string; answer: string }[]>
+    Record<string, (typeof data.otherAnswers)[number][]>
   >((acc, a) => {
-    (acc[a.category] ??= []).push({ question: a.question, answer: a.answer });
+    (acc[a.category] ??= []).push(a);
     return acc;
   }, {});
+
+  const myAnswerClass: Record<"high" | "mid" | "low", string> = {
+    high: "text-green-600",
+    mid: "text-amber-600",
+    low: "text-red-600",
+  };
 
   return (
     <div className="mx-auto w-full max-w-2xl px-4 py-6">
@@ -85,6 +91,12 @@ export default async function ConversationPage({
             {data.otherScore != null && <CompatibilityBadge score={data.otherScore} />}
           </summary>
           <div className="space-y-6 border-t border-border p-5">
+            <p className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
+              <span>Kalın satır karşı tarafın yanıtı, altındaki senin yanıtın:</span>
+              <span className="font-medium text-green-600">● uyumlu</span>
+              <span className="font-medium text-amber-600">● kısmen</span>
+              <span className="font-medium text-red-600">● farklı</span>
+            </p>
             {Object.entries(groupedAnswers).map(([category, items]) => (
               <div key={category}>
                 <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-primary/70">
@@ -97,6 +109,15 @@ export default async function ConversationPage({
                         {a.question}
                       </span>
                       <span className="text-sm font-semibold text-foreground">{a.answer}</span>
+                      {a.myAnswer != null && (
+                        <span
+                          className={`text-xs font-medium ${
+                            a.match ? myAnswerClass[a.match] : "text-muted-foreground"
+                          }`}
+                        >
+                          Sen: {a.myAnswer}
+                        </span>
+                      )}
                     </div>
                   ))}
                 </div>

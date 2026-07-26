@@ -4,6 +4,7 @@ import {
   PHOTO_CATEGORIES,
 } from "@roomim/shared/constants";
 import { CITIES, districtsFor } from "@roomim/shared/data/locations";
+import { neighborhoodsFor } from "@roomim/shared/data/neighborhoods";
 import {
   listingFormSchema,
   validateCategorizedPhotos,
@@ -200,6 +201,16 @@ export default function NewListing() {
   }
 
   const districts = f.city ? districtsFor(f.city) : [];
+  const neighborhoods = f.city && f.district ? neighborhoodsFor(f.city, f.district) : [];
+  // Yazılana göre filtrelenmiş mahalle önerileri (tam eşleşme seçiliyse gizle).
+  const hoodQuery = f.neighborhood.trim().toLocaleLowerCase("tr");
+  const hoodExactSelected =
+    !!hoodQuery && neighborhoods.some((n) => n.toLocaleLowerCase("tr") === hoodQuery);
+  const hoodSuggestions = hoodExactSelected
+    ? []
+    : neighborhoods
+        .filter((n) => (hoodQuery ? n.toLocaleLowerCase("tr").includes(hoodQuery) : true))
+        .slice(0, 30);
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.bg }} edges={["bottom"]}>
@@ -274,7 +285,7 @@ export default function NewListing() {
                 label={c}
                 active={f.city === c}
                 onPress={() => {
-                  setF((p) => ({ ...p, city: c, district: "" }));
+                  setF((p) => ({ ...p, city: c, district: "", neighborhood: "" }));
                   setErrors((prev) => ({ ...prev, city: "", district: "" }));
                 }}
               />
@@ -288,12 +299,43 @@ export default function NewListing() {
             </Text>
             <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
               {districts.map((d) => (
-                <Chip key={d} label={d} active={f.district === d} onPress={() => set("district", d)} />
+                <Chip
+                  key={d}
+                  label={d}
+                  active={f.district === d}
+                  onPress={() => {
+                    setF((p) => ({ ...p, district: d, neighborhood: "" }));
+                    setErrors((prev) => ({ ...prev, district: "" }));
+                  }}
+                />
               ))}
             </View>
           </View>
         ) : null}
-        <Input label="Semt / Mahalle (ops.)" value={f.neighborhood} onChangeText={(v) => set("neighborhood", v)} error={errors.neighborhood} />
+
+        {/* Semt / Mahalle — veri varsa yazarak ara + öneriden seç, yoksa serbest metin */}
+        <View style={{ gap: 8 }}>
+          <Input
+            label="Semt / Mahalle (ops.)"
+            value={f.neighborhood}
+            onChangeText={(v) => set("neighborhood", v)}
+            placeholder={
+              !f.district
+                ? "Önce ilçe seç"
+                : neighborhoods.length > 0
+                  ? "Ara veya listeden seç"
+                  : "Ör. Çayyolu"
+            }
+            error={errors.neighborhood}
+          />
+          {hoodSuggestions.length > 0 ? (
+            <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
+              {hoodSuggestions.map((n) => (
+                <Chip key={n} label={n} active={false} onPress={() => set("neighborhood", n)} />
+              ))}
+            </View>
+          ) : null}
+        </View>
 
         <Input label="Aylık kira (₺)" value={f.monthlyRent} onChangeText={(v) => set("monthlyRent", v)} keyboardType="numeric" error={errors.monthlyRent} />
         <Input label="Aidat (₺/ay, ops.)" value={f.dues} onChangeText={(v) => set("dues", v)} keyboardType="numeric" error={errors.dues} />

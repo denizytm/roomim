@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Heart, LogOut, MessageCircle, Plus, ShieldCheck, UserRound } from "lucide-react";
 
+import { HeaderMenu } from "@/components/layout/header-menu";
 import { Logo } from "@/components/layout/logo";
 import { RealtimeNotifications } from "@/components/realtime-notifications";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -58,6 +59,7 @@ export async function SiteHeader() {
         <div className="flex items-center gap-2">
           {user ? (
             <>
+              <HeaderMenu role={profile?.role ?? null} isAdmin={profile?.is_admin ?? false} />
               {profile?.role !== "seeker" && (
                 <Button size="sm" render={<Link href="/listings/new" />}>
                   <Plus /> İlan Ver

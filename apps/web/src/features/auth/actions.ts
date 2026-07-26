@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { emailDomain, loginSchema, registerSchema } from "@/lib/validation/auth";
 
-export type AuthState = { error?: string } | null;
+export type AuthState = { error?: string; success?: boolean } | null;
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
 
@@ -25,7 +25,7 @@ export async function registerAction(
     return { error: parsed.error.issues[0]?.message ?? "Form geçersiz" };
   }
 
-  const { fullName, email, password, role, referralCode } = parsed.data;
+  const { fullName, email, password, referralCode } = parsed.data;
   const supabase = await createClient();
 
   // Pre-check: herhangi bir Türk üniversitesi e-postası (.edu.tr) kabul edilir.
@@ -44,7 +44,8 @@ export async function registerAction(
     email,
     password,
     options: {
-      data: { full_name: fullName, role, referral_code: referralCode ?? "" },
+      // Rol seçimi onboarding'e taşındı; burada göndermiyoruz.
+      data: { full_name: fullName, referral_code: referralCode ?? "" },
       emailRedirectTo: `${siteUrl}/auth/callback?next=/onboarding`,
     },
   });
@@ -66,7 +67,10 @@ export async function registerAction(
     redirect("/onboarding");
   }
 
-  redirect(`/verify?email=${encodeURIComponent(email)}`);
+  // Onay maili gönderildi. Redirect yerine success dönüyoruz; kayıt bileşeni
+  // "e-postanı kontrol et" ekranını aynı sayfada gösterip form değerlerini
+  // koruyor (kullanıcı "mail adresini değiştir" derse alanlar dolu kalıyor).
+  return { success: true };
 }
 
 export async function loginAction(

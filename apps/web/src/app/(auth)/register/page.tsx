@@ -1,8 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { useActionState, useState } from "react";
-import { Home, Loader2, Search } from "lucide-react";
+import { useEffect, useState, useTransition } from "react";
+import { Loader2, MailCheck, Pencil, RefreshCw } from "lucide-react";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -15,16 +16,107 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ROLE_DESCRIPTIONS, ROLE_LABELS } from "@/lib/constants";
-import type { UserRole } from "@/lib/types/database.types";
 import { registerAction } from "@/features/auth/actions";
-import { cn } from "@/lib/utils";
+import { createClient } from "@/lib/supabase/client";
 
-const ROLE_ICONS: Record<UserRole, typeof Home> = { host: Home, seeker: Search };
+const EMPTY = { fullName: "", email: "", password: "", password2: "", referralCode: "" };
 
 export default function RegisterPage() {
-  const [state, formAction, pending] = useActionState(registerAction, null);
-  const [role, setRole] = useState<UserRole>("seeker");
+  const [form, setForm] = useState(EMPTY);
+  const set = (key: keyof typeof EMPTY, value: string) =>
+    setForm((prev) => ({ ...prev, [key]: value }));
+
+  const [error, setError] = useState<string | null>(null);
+  const [sent, setSent] = useState(false);
+  const [pending, startTransition] = useTransition();
+
+  // "Onay mailini tekrar gönder" için basit 60sn cooldown.
+  const [cooldown, setCooldown] = useState(0);
+  useEffect(() => {
+    if (cooldown <= 0) return;
+    const t = setTimeout(() => setCooldown((c) => c - 1), 1000);
+    return () => clearTimeout(t);
+  }, [cooldown]);
+
+  function onSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setError(null);
+
+    if (form.password.length < 8) {
+      setError("Şifre en az 8 karakter olmalı.");
+      return;
+    }
+    if (form.password !== form.password2) {
+      setError("Şifreler eşleşmiyor. Aynı şifreyi iki kez gir.");
+      return;
+    }
+
+    const fd = new FormData();
+    fd.set("fullName", form.fullName);
+    fd.set("email", form.email);
+    fd.set("password", form.password);
+    if (form.referralCode) fd.set("referralCode", form.referralCode);
+
+    startTransition(async () => {
+      const res = await registerAction(null, fd);
+      if (res?.error) setError(res.error);
+      else if (res?.success) setSent(true);
+    });
+  }
+
+  async function resend() {
+    if (!form.email) return;
+    const supabase = createClient();
+    const { error } = await supabase.auth.resend({ type: "signup", email: form.email });
+    if (error) {
+      toast.error("Gönderilemedi: " + error.message);
+    } else {
+      toast.success("Onay maili tekrar gönderildi. Spam/gereksiz klasörünü de kontrol et.");
+      setCooldown(60);
+    }
+  }
+
+  // "E-postanı kontrol et" ekranı — form değerleri state'te korunuyor.
+  if (sent) {
+    return (
+      <Card className="text-center">
+        <CardHeader>
+          <span className="mx-auto grid size-14 place-items-center rounded-2xl bg-primary/10 text-primary">
+            <MailCheck className="size-7" />
+          </span>
+          <CardTitle className="mt-2 text-2xl">E-postanı kontrol et</CardTitle>
+          <CardDescription>
+            <span className="font-medium text-foreground">{form.email}</span> adresine bir onay
+            bağlantısı gönderdik. Hesabını etkinleştirmek için bağlantıya tıkla.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <p className="text-sm text-muted-foreground">
+            Mail gelmediyse spam/gereksiz klasörünü kontrol et ya da aşağıdan tekrar gönder.
+          </p>
+          <Button className="w-full" onClick={resend} disabled={cooldown > 0}>
+            <RefreshCw />
+            {cooldown > 0 ? `Tekrar gönder (${cooldown}s)` : "Onay mailini tekrar gönder"}
+          </Button>
+          <Button
+            variant="outline"
+            className="w-full"
+            onClick={() => {
+              // Sadece e-postayı temizle; diğer alanlar dolu kalsın.
+              setSent(false);
+              setError(null);
+              set("email", "");
+            }}
+          >
+            <Pencil /> Mail adresini değiştir
+          </Button>
+          <Button variant="ghost" className="w-full" render={<Link href="/login" />}>
+            Giriş ekranına dön
+          </Button>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card>
@@ -35,53 +127,32 @@ export default function RegisterPage() {
         </CardDescription>
       </CardHeader>
 
-      <form action={formAction}>
+      <form onSubmit={onSubmit}>
         <CardContent className="space-y-5">
           <div className="space-y-2">
-            <Label>Ne arıyorsun?</Label>
-            <div className="grid grid-cols-2 gap-3">
-              {(Object.keys(ROLE_LABELS) as UserRole[]).map((r) => {
-                const Icon = ROLE_ICONS[r];
-                const active = role === r;
-                return (
-                  <button
-                    type="button"
-                    key={r}
-                    onClick={() => setRole(r)}
-                    className={cn(
-                      "flex flex-col gap-1.5 rounded-xl border p-3 text-left transition-all",
-                      active
-                        ? "border-primary bg-primary/5 ring-2 ring-primary/30"
-                        : "border-border hover:border-primary/40 hover:bg-muted",
-                    )}
-                  >
-                    <Icon className={cn("size-5", active ? "text-primary" : "text-muted-foreground")} />
-                    <span className="text-sm font-semibold">{ROLE_LABELS[r]}</span>
-                    <span className="text-xs text-muted-foreground">{ROLE_DESCRIPTIONS[r]}</span>
-                  </button>
-                );
-              })}
-            </div>
-            <input type="hidden" name="role" value={role} />
-          </div>
-
-          <div className="space-y-2">
             <Label htmlFor="fullName">Ad Soyad</Label>
-            <Input id="fullName" name="fullName" placeholder="Deniz Yılmaz" required />
+            <Input
+              id="fullName"
+              value={form.fullName}
+              onChange={(e) => set("fullName", e.target.value)}
+              placeholder="Deniz Yılmaz"
+              required
+            />
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="email">Üniversite e-postası</Label>
             <Input
               id="email"
-              name="email"
               type="email"
+              value={form.email}
+              onChange={(e) => set("email", e.target.value)}
               placeholder="ad.soyad@metu.edu.tr"
               autoComplete="email"
               required
             />
             <p className="text-xs text-muted-foreground">
-              Yalnızca tanımlı üniversite uzantıları kabul edilir.
+              Yalnızca üniversite (.edu.tr) e-postası kabul edilir.
             </p>
           </div>
 
@@ -89,8 +160,9 @@ export default function RegisterPage() {
             <Label htmlFor="password">Şifre</Label>
             <Input
               id="password"
-              name="password"
               type="password"
+              value={form.password}
+              onChange={(e) => set("password", e.target.value)}
               placeholder="En az 8 karakter"
               autoComplete="new-password"
               required
@@ -98,13 +170,31 @@ export default function RegisterPage() {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="referralCode">Referans kodu (opsiyonel)</Label>
-            <Input id="referralCode" name="referralCode" placeholder="ARKADAŞ kodu" />
+            <Label htmlFor="password2">Şifre (tekrar)</Label>
+            <Input
+              id="password2"
+              type="password"
+              value={form.password2}
+              onChange={(e) => set("password2", e.target.value)}
+              placeholder="Şifreni tekrar gir"
+              autoComplete="new-password"
+              required
+            />
           </div>
 
-          {state?.error && (
+          <div className="space-y-2">
+            <Label htmlFor="referralCode">Referans kodu (opsiyonel)</Label>
+            <Input
+              id="referralCode"
+              value={form.referralCode}
+              onChange={(e) => set("referralCode", e.target.value)}
+              placeholder="ARKADAŞ kodu"
+            />
+          </div>
+
+          {error && (
             <p className="rounded-lg bg-destructive/10 px-3 py-2 text-sm text-destructive">
-              {state.error}
+              {error}
             </p>
           )}
         </CardContent>

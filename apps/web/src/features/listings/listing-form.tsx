@@ -19,7 +19,7 @@ import {
   LISTING_FEATURES,
   PHOTO_CATEGORIES,
 } from "@/lib/constants";
-import { CITIES, districtsFor } from "@/lib/data/locations";
+import { CITIES, districtsFor, neighborhoodsFor } from "@/lib/data/locations";
 import { listingFormSchema, validateCategorizedPhotos } from "@/lib/validation/listing";
 import { cn } from "@/lib/utils";
 
@@ -82,6 +82,9 @@ export function ListingForm({ userId }: { userId: string }) {
   const allCategories = PHOTO_CATEGORIES.every((c) =>
     photos.some((p) => p.category === c.key),
   );
+
+  // Seçili il/ilçeye göre mahalle listesi (veri yoksa serbest metne düşer).
+  const neighborhoods = city && district ? neighborhoodsFor(city, district) : [];
 
   function toggleFeature(value: string) {
     setFeatures((prev) =>
@@ -240,6 +243,7 @@ export function ListingForm({ userId }: { userId: string }) {
               className={errCls("district")}
               onChange={(e) => {
                 setDistrict(e.target.value);
+                set("neighborhood", ""); // ilçe değişince mahalle seçimini sıfırla
                 clearError("district");
               }}
             >
@@ -256,12 +260,30 @@ export function ListingForm({ userId }: { userId: string }) {
           </div>
           <div className="space-y-2">
             <Label htmlFor="neighborhood">Semt / Mahalle (opsiyonel)</Label>
-            <Input
-              id="neighborhood"
-              value={f.neighborhood}
-              onChange={(e) => set("neighborhood", e.target.value)}
-              placeholder="Ör. Çayyolu"
-            />
+            {neighborhoods.length > 0 ? (
+              <NativeSelect
+                id="neighborhood"
+                disabled={!district}
+                value={f.neighborhood}
+                onChange={(e) => set("neighborhood", e.target.value)}
+              >
+                <option value="">Seç (opsiyonel)</option>
+                {neighborhoods.map((n) => (
+                  <option key={n} value={n}>
+                    {n}
+                  </option>
+                ))}
+              </NativeSelect>
+            ) : (
+              // İlçe seçilmediyse veya o ilçe için mahalle verisi yoksa serbest metin.
+              <Input
+                id="neighborhood"
+                disabled={!district}
+                value={f.neighborhood}
+                onChange={(e) => set("neighborhood", e.target.value)}
+                placeholder={district ? "Ör. Çayyolu" : "Önce ilçe seç"}
+              />
+            )}
           </div>
         </div>
         <p className="mt-3 text-xs text-muted-foreground">
