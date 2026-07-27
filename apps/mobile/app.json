@@ -8,8 +8,11 @@
     "scheme": "roomim",
     "userInterfaceStyle": "automatic",
     "ios": {
-      "supportsTablet": true,
-      "bundleIdentifier": "com.hcdijital.roomim"
+      "supportsTablet": false,
+      "bundleIdentifier": "com.hcdijital.roomim",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -47,6 +50,11 @@
           "android": {
             "image": "./assets/images/splash-icon.png",
             "imageWidth": 96
+          },
+          "ios": {
+            "image": "./assets/images/splash-icon.png",
+            "imageWidth": 96,
+            "resizeMode": "contain"
           }
         }
       ],
