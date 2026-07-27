@@ -5,7 +5,14 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { emailDomain, loginSchema, registerSchema } from "@/lib/validation/auth";
 
-export type AuthState = { error?: string; success?: boolean } | null;
+export type AuthState = {
+  error?: string;
+  success?: boolean;
+  // Doğrulanmamış e-postayla giriş denendi: login sayfası "önce doğrula" +
+  // "tekrar gönder" ekranını gösterir.
+  needsVerification?: boolean;
+  email?: string;
+} | null;
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
 
@@ -90,6 +97,10 @@ export async function loginAction(
   const { error } = await supabase.auth.signInWithPassword(parsed.data);
 
   if (error) {
+    // E-posta henüz doğrulanmamış: giriş hatası değil — doğrulama uyarısı göster.
+    if (error.code === "email_not_confirmed" || /not confirmed/i.test(error.message)) {
+      return { needsVerification: true, email: parsed.data.email };
+    }
     return { error: "E-posta veya şifre hatalı." };
   }
 

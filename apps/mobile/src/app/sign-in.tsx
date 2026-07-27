@@ -21,12 +21,35 @@ export default function SignIn() {
 
   async function signIn() {
     setLoading(true);
-    const { error } = await supabase.auth.signInWithPassword({
-      email: email.trim().toLowerCase(),
-      password,
-    });
+    const mail = email.trim().toLowerCase();
+    const { error } = await supabase.auth.signInWithPassword({ email: mail, password });
     setLoading(false);
-    if (error) Alert.alert("Giriş başarısız", "E-posta veya şifre hatalı.");
+    if (!error) return;
+
+    // E-posta doğrulanmamış: giriş hatası değil — doğrula + tekrar gönder uyarısı.
+    if (error.code === "email_not_confirmed" || /not confirmed/i.test(error.message)) {
+      Alert.alert(
+        "Önce e-postanı doğrula",
+        "Hesabın henüz doğrulanmamış. E-postana gönderdiğimiz bağlantıya tıkla, sonra tekrar giriş yap.",
+        [
+          {
+            text: "Doğrulama mailini tekrar gönder",
+            onPress: async () => {
+              const { error: rErr } = await supabase.auth.resend({ type: "signup", email: mail });
+              Alert.alert(
+                rErr ? "Gönderilemedi" : "Gönderildi",
+                rErr
+                  ? rErr.message
+                  : "Doğrulama maili tekrar gönderildi. Spam/gereksiz klasörünü de kontrol et.",
+              );
+            },
+          },
+          { text: "Tamam", style: "cancel" },
+        ],
+      );
+      return;
+    }
+    Alert.alert("Giriş başarısız", "E-posta veya şifre hatalı.");
   }
 
   return (
