@@ -2,14 +2,14 @@ import { ROLE_LABELS } from "@roomim/shared/constants";
 import { computeBadges } from "@roomim/shared/loyalty";
 import type { Profile, UserRole } from "@roomim/shared/types/database.types";
 import { Image } from "expo-image";
-import { useLocalSearchParams } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
 import { ActivityIndicator, Alert, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { Btn } from "@/components/form";
 import { useSession } from "@/lib/auth-context";
-import { createReport, getProfileFull } from "@/lib/queries";
+import { blockUser, createReport, getProfileFull, isUserBlocked, unblockUser } from "@/lib/queries";
 import { publicImageUrl } from "@/lib/storage";
 import { colors } from "@/lib/theme";
 
@@ -19,6 +19,8 @@ export default function PublicProfileScreen() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [university, setUniversity] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [blocked, setBlocked] = useState(false);
+  const [blockBusy, setBlockBusy] = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -29,6 +31,14 @@ export default function PublicProfileScreen() {
       })
       .finally(() => setLoading(false));
   }, [id]);
+
+  useEffect(() => {
+    const me = session?.user.id;
+    if (!id || !me || me === id) return;
+    isUserBlocked(me, id)
+      .then(setBlocked)
+      .catch(() => {});
+  }, [id, session?.user.id]);
 
   async function report() {
     if (!session || !profile) return;
@@ -47,6 +57,42 @@ export default function PublicProfileScreen() {
         },
       },
     ]);
+  }
+
+  function toggleBlock() {
+    const me = session?.user.id;
+    if (!me || !profile) return;
+
+    if (blocked) {
+      setBlockBusy(true);
+      unblockUser(me, profile.id)
+        .then(() => setBlocked(false))
+        .catch((e) => Alert.alert("Hata", e instanceof Error ? e.message : "İşlem başarısız"))
+        .finally(() => setBlockBusy(false));
+      return;
+    }
+
+    Alert.alert(
+      "Kullanıcıyı engelle",
+      "Engellediğinde birbirinizin ilanlarını ve mesajlarını göremezsiniz, yeni mesaj gönderilemez. İstediğin zaman kaldırabilirsin.",
+      [
+        { text: "Vazgeç", style: "cancel" },
+        {
+          text: "Engelle",
+          style: "destructive",
+          onPress: () => {
+            setBlockBusy(true);
+            blockUser(me, profile.id)
+              .then(() => {
+                setBlocked(true);
+                router.back();
+              })
+              .catch((e) => Alert.alert("Hata", e instanceof Error ? e.message : "İşlem başarısız"))
+              .finally(() => setBlockBusy(false));
+          },
+        },
+      ],
+    );
   }
 
   if (loading) {
@@ -154,6 +200,12 @@ export default function PublicProfileScreen() {
           <>
             <View style={{ height: 4 }} />
             <Btn title="Şikayet et" onPress={report} variant="outline" />
+            <Btn
+              title={blocked ? "Engeli kaldır" : "Engelle"}
+              onPress={toggleBlock}
+              loading={blockBusy}
+              variant="outline"
+            />
           </>
         )}
       </ScrollView>

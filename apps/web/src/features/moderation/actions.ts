@@ -30,6 +30,45 @@ export async function createReportAction(
   return { success: true };
 }
 
+// ---------------------------------------------------------------------------
+// Engelleme — App Store Guideline 1.2 (UGC).
+// Engel çift yönlüdür ve RLS'te uygulanır: karşı tarafın ilanları, konuşmaları
+// ve mesajları tüm sorgulardan otomatik düşer.
+// ---------------------------------------------------------------------------
+export type BlockState = { error?: string; blocked?: boolean } | null;
+
+export async function toggleBlockAction(
+  _prev: BlockState,
+  formData: FormData,
+): Promise<BlockState> {
+  const targetId = (formData.get("userId") as string) ?? "";
+  const shouldBlock = formData.get("block") === "1";
+  if (!targetId) return { error: "Kullanıcı bulunamadı." };
+
+  const { supabase, user } = await requireUser();
+  if (targetId === user.id) return { error: "Kendini engelleyemezsin." };
+
+  if (shouldBlock) {
+    const { error } = await supabase
+      .from("blocks")
+      .insert({ blocker_id: user.id, blocked_id: targetId });
+    if (error) return { error: error.message };
+  } else {
+    const { error } = await supabase
+      .from("blocks")
+      .delete()
+      .eq("blocker_id", user.id)
+      .eq("blocked_id", targetId);
+    if (error) return { error: error.message };
+  }
+
+  revalidatePath(`/u/${targetId}`);
+  revalidatePath("/messages");
+  revalidatePath("/listings");
+  revalidatePath("/profile");
+  return { blocked: shouldBlock };
+}
+
 // Admin: şikayeti reddet (kapat)
 export async function dismissReportAction(formData: FormData) {
   const id = formData.get("id") as string;

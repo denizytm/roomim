@@ -114,3 +114,29 @@ export async function signOut() {
   await supabase.auth.signOut();
   redirect("/");
 }
+
+// Hesabı kalıcı olarak siler — App Store Guideline 5.1.1(v).
+// auth.users silinir; profil, ilanlar, mesajlar ve yüklenen dosyalar da gider.
+export type DeleteAccountState = { error?: string } | null;
+
+export async function deleteAccountAction(
+  _prev: DeleteAccountState,
+  formData: FormData,
+): Promise<DeleteAccountState> {
+  if ((formData.get("confirm") as string)?.trim().toLocaleUpperCase("tr-TR") !== "SİL") {
+    return { error: 'Onaylamak için "SİL" yaz.' };
+  }
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) redirect("/login");
+
+  const { error } = await supabase.rpc("delete_own_account");
+  if (error) return { error: error.message };
+
+  // Hesap gitti; elimizdeki çerez artık geçersiz — yerel oturumu da temizle.
+  await supabase.auth.signOut();
+  redirect("/");
+}

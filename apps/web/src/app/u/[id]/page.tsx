@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { ArrowLeft, BadgeCheck, GraduationCap, Star } from "lucide-react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { BlockButton } from "@/features/moderation/block-button";
 import { ReportButton } from "@/features/moderation/report-button";
 import { requireOnboardedProfile } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
@@ -47,6 +48,15 @@ export default async function PublicProfilePage({
     ? new Date(profile.graduation_date).getFullYear()
     : null;
   const isMe = me.id === profile.id;
+
+  // blocks RLS'i yalnızca kendi kayıtlarımı döndürür — sonuç varsa ben engellemişim.
+  const { data: block } = await supabase
+    .from("blocks")
+    .select("blocked_id")
+    .eq("blocker_id", me.id)
+    .eq("blocked_id", profile.id)
+    .maybeSingle();
+  const isBlocked = block !== null;
 
   return (
     <div className="mx-auto w-full max-w-2xl px-4 py-10">
@@ -115,8 +125,9 @@ export default async function PublicProfilePage({
       </div>
 
       {!isMe && (
-        <div className="mt-4 flex justify-end">
+        <div className="mt-4 flex items-center justify-end gap-3">
           <ReportButton reportedUserId={profile.id} />
+          <BlockButton userId={profile.id} blocked={isBlocked} />
         </div>
       )}
     </div>

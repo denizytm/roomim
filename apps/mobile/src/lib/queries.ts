@@ -773,3 +773,69 @@ export async function createReport(
   });
   if (error) throw error;
 }
+
+// ---------------------------------------------------------------------------
+// Engelleme — App Store Guideline 1.2 (UGC) gereği.
+// Engel çift yönlüdür ve RLS seviyesinde uygulanır: engellenen tarafın ilanları,
+// konuşmaları ve mesajları sorgulardan otomatik düşer.
+// ---------------------------------------------------------------------------
+export async function blockUser(blockerId: string, blockedId: string): Promise<void> {
+  const { error } = await supabase
+    .from("blocks")
+    .insert({ blocker_id: blockerId, blocked_id: blockedId });
+  if (error) throw error;
+}
+
+export async function unblockUser(blockerId: string, blockedId: string): Promise<void> {
+  const { error } = await supabase
+    .from("blocks")
+    .delete()
+    .eq("blocker_id", blockerId)
+    .eq("blocked_id", blockedId);
+  if (error) throw error;
+}
+
+export async function isUserBlocked(blockerId: string, blockedId: string): Promise<boolean> {
+  const { data, error } = await supabase
+    .from("blocks")
+    .select("blocked_id")
+    .eq("blocker_id", blockerId)
+    .eq("blocked_id", blockedId)
+    .maybeSingle();
+  if (error) throw error;
+  return data !== null;
+}
+
+export type BlockedUser = { id: string; full_name: string | null; avatar_url: string | null };
+
+export async function getBlockedUsers(blockerId: string): Promise<BlockedUser[]> {
+  const { data, error } = await supabase
+    .from("blocks")
+    .select("blocked_id")
+    .eq("blocker_id", blockerId)
+    .order("created_at", { ascending: false });
+  if (error) throw error;
+
+  const ids = (data ?? []).map((b) => b.blocked_id);
+  if (ids.length === 0) return [];
+
+  // Profiller engelden etkilenmez (RLS'te bilinçli tercih) — isim gösterebilmek şart.
+  const { data: profiles, error: pErr } = await supabase
+    .from("profiles")
+    .select("id, full_name, avatar_url")
+    .in("id", ids);
+  if (pErr) throw pErr;
+
+  const byId = new Map(profiles?.map((p) => [p.id, p]) ?? []);
+  return ids.flatMap((id) => {
+    const p = byId.get(id);
+    return p ? [{ id: p.id, full_name: p.full_name, avatar_url: p.avatar_url }] : [];
+  });
+}
+
+// Hesabı kalıcı olarak siler — App Store Guideline 5.1.1(v).
+// auth.users silinir, profil/ilan/mesaj/foto cascade ile gider. Geri alınamaz.
+export async function deleteOwnAccount(): Promise<void> {
+  const { error } = await supabase.rpc("delete_own_account");
+  if (error) throw error;
+}

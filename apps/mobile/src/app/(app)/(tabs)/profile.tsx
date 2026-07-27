@@ -138,7 +138,19 @@ export default function ProfileScreen() {
           onPress={() => router.push("/support" as Href)}
           variant="outline"
         />
+        <Btn
+          title="Engellenen kullanıcılar"
+          onPress={() => router.push("/blocked" as Href)}
+          variant="outline"
+        />
         <Btn title="Çıkış yap" onPress={signOut} variant="outline" />
+
+        <View style={{ height: 8 }} />
+        <Btn
+          title="Hesabımı sil"
+          onPress={() => router.push("/account-delete" as Href)}
+          variant="outline"
+        />
       </ScrollView>
     </SafeAreaView>
   );

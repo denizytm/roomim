@@ -44,6 +44,14 @@ export default function AppLayout() {
           options={{ headerShown: true, title: "Destek / Şikayet", headerTintColor: colors.text }}
         />
         <Stack.Screen
+          name="blocked"
+          options={{ headerShown: true, title: "Engellenen kullanıcılar", headerTintColor: colors.text }}
+        />
+        <Stack.Screen
+          name="account-delete"
+          options={{ headerShown: true, title: "Hesabı sil", headerTintColor: colors.text }}
+        />
+        <Stack.Screen
           name="user/[id]"
           options={{ headerShown: true, title: "Profil", headerTintColor: colors.text }}
         />

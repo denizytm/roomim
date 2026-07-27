@@ -294,6 +294,12 @@ export type Database = {
         Update: Partial<Database["public"]["Tables"]["listing_passes"]["Insert"]>;
         Relationships: [];
       };
+      blocks: {
+        Row: { blocker_id: string; blocked_id: string; created_at: string };
+        Insert: { blocker_id: string; blocked_id: string; created_at?: string };
+        Update: Partial<Database["public"]["Tables"]["blocks"]["Insert"]>;
+        Relationships: [];
+      };
     };
     Views: Record<never, never>;
     Functions: {
@@ -312,6 +318,10 @@ export type Database = {
       conversation_other_answers: {
         Args: { conv_id: string };
         Returns: { question_id: number; value: number }[];
+      };
+      delete_own_account: {
+        Args: Record<string, never>;
+        Returns: undefined;
       };
     };
     Enums: {
@@ -336,5 +346,6 @@ export type Conversation = Tables["conversations"]["Row"];
 export type Message = Tables["messages"]["Row"];
 export type ReferralCode = Tables["referral_codes"]["Row"];
 export type Report = Tables["reports"]["Row"];
+export type Block = Tables["blocks"]["Row"];
 
 export type QuestionOption = { value: number; label: string };
