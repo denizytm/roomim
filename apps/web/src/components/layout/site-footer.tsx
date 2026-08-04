@@ -14,9 +14,14 @@ export function SiteFooter() {
           </p>
         </div>
         <div className="flex flex-col gap-2 sm:items-end">
-          <Link href="/gizlilik" className="text-xs font-medium hover:text-foreground">
-            Gizlilik Politikası
-          </Link>
+          <div className="flex gap-4">
+            <Link href="/gizlilik" className="text-xs font-medium hover:text-foreground">
+              Gizlilik Politikası
+            </Link>
+            <Link href="/hesap-sil" className="text-xs font-medium hover:text-foreground">
+              Hesap Silme
+            </Link>
+          </div>
           <p className="text-xs">
             © {new Date().getFullYear()} Roomim · Kapalı beta · ODTÜ, Ankara
           </p>
