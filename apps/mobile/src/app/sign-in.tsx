@@ -1,4 +1,4 @@
-import { Link } from "expo-router";
+import { Link, type Href } from "expo-router";
 import { useState } from "react";
 import {
   Alert,
@@ -80,6 +80,15 @@ export default function SignIn() {
             placeholder="••••••••"
             secureTextEntry
           />
+
+          <View style={{ alignItems: "flex-end", marginTop: -6 }}>
+            <Link
+              href={"/forgot-password" as Href}
+              style={{ color: colors.primary, fontWeight: "600", fontSize: 13 }}
+            >
+              Şifremi unuttum?
+            </Link>
+          </View>
 
           <Btn title="Giriş yap" onPress={signIn} loading={loading} />
 
