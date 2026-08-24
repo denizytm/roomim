@@ -2,6 +2,7 @@ import { Stack } from "expo-router";
 import { ActivityIndicator, View } from "react-native";
 
 import { RealtimeNotifications } from "@/components/realtime-notifications";
+import { WarningsGate } from "@/components/warnings-gate";
 import { useSession } from "@/lib/auth-context";
 import { colors } from "@/lib/theme";
 
@@ -21,6 +22,7 @@ export default function AppLayout() {
   return (
     <>
       {onboarded && <RealtimeNotifications />}
+      {onboarded && <WarningsGate />}
       <Stack screenOptions={{ headerShown: false }}>
         <Stack.Protected guard={!onboarded}>
         <Stack.Screen name="onboarding" />

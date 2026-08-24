@@ -59,6 +59,85 @@ export async function getAllListingsForAdmin(): Promise<AdminListing[]> {
   }));
 }
 
+export type AdminUser = {
+  id: string;
+  fullName: string | null;
+  email: string;
+  university: string | null;
+  role: string | null;
+  isAdmin: boolean;
+  banned: boolean;
+  bannedUntil: string | null;
+  points: number;
+  memberNo: number | null;
+  createdAt: string;
+  listingCount: number;
+  reportCount: number;
+};
+
+// Tüm kullanıcılar (email dahil) — security definer RPC, sadece adminlere döner.
+export async function getAdminUsers(
+  search = "",
+  filter = "all",
+): Promise<AdminUser[]> {
+  const supabase = await createClient();
+  const { data } = await supabase.rpc("admin_list_users", { search, filter });
+  return (data ?? []).map((u) => ({
+    id: u.id,
+    fullName: u.full_name,
+    email: u.email,
+    university: u.university,
+    role: u.role,
+    isAdmin: u.is_admin,
+    banned: u.banned,
+    bannedUntil: u.banned_until,
+    points: u.points ?? 0,
+    memberNo: u.member_no,
+    createdAt: u.created_at,
+    listingCount: Number(u.listing_count ?? 0),
+    reportCount: Number(u.report_count ?? 0),
+  }));
+}
+
+export type SentWarning = {
+  id: string;
+  message: string;
+  createdAt: string;
+  readAt: string | null;
+  userName: string;
+  listingTitle: string | null;
+};
+
+// Gönderilen uyarı kayıtları (admin RLS ile hepsi görünür).
+export async function getSentWarnings(): Promise<SentWarning[]> {
+  const supabase = await createClient();
+  const { data: warnings } = await supabase
+    .from("user_warnings")
+    .select("id, message, created_at, read_at, user_id, listing_id")
+    .order("created_at", { ascending: false })
+    .limit(100);
+
+  if (!warnings?.length) return [];
+
+  const userIds = [...new Set(warnings.map((w) => w.user_id))];
+  const listingIds = [...new Set(warnings.map((w) => w.listing_id).filter(Boolean))] as string[];
+  const [{ data: profs }, { data: lst }] = await Promise.all([
+    supabase.from("profiles").select("id, full_name").in("id", userIds),
+    supabase.from("listings").select("id, title").in("id", listingIds),
+  ]);
+  const pm = new Map((profs ?? []).map((p) => [p.id, p.full_name]));
+  const lm = new Map((lst ?? []).map((l) => [l.id, l.title]));
+
+  return warnings.map((w) => ({
+    id: w.id,
+    message: w.message,
+    createdAt: w.created_at,
+    readAt: w.read_at,
+    userName: pm.get(w.user_id) ?? "Kullanıcı",
+    listingTitle: w.listing_id ? (lm.get(w.listing_id) ?? "İlan") : null,
+  }));
+}
+
 export async function getBannedUsers(): Promise<BannedUser[]> {
   const supabase = await createClient();
   const { data } = await supabase

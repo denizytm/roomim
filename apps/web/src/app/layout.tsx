@@ -5,6 +5,7 @@ import { SiteFooter } from "@/components/layout/site-footer";
 import { SiteHeader } from "@/components/layout/site-header";
 import { Providers } from "@/components/providers";
 import { Toaster } from "@/components/ui/sonner";
+import { WarningsBanner } from "@/components/warnings-banner";
 
 import "./globals.css";
 
@@ -37,6 +38,7 @@ export default function RootLayout({
       <body className="flex min-h-full flex-col bg-background">
         <Providers>
           <SiteHeader />
+          <WarningsBanner />
           <main className="flex-1">{children}</main>
           <SiteFooter />
           <Toaster richColors position="top-center" />

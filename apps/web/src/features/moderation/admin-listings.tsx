@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { EyeOff, Eye, Trash2, XCircle } from "lucide-react";
+import { EyeOff, Eye, MessageSquareWarning, Trash2, XCircle } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -18,7 +18,13 @@ const STATUS: Record<string, { label: string; cls: string }> = {
   closed: { label: "Kapalı", cls: "bg-muted text-muted-foreground" },
 };
 
-export function AdminListings({ listings }: { listings: AdminListing[] }) {
+export function AdminListings({
+  listings,
+  onWarnOwner,
+}: {
+  listings: AdminListing[];
+  onWarnOwner?: (l: AdminListing) => void;
+}) {
   if (listings.length === 0) {
     return (
       <div className="rounded-2xl border border-dashed border-border py-10 text-center text-muted-foreground">
@@ -51,6 +57,16 @@ export function AdminListings({ listings }: { listings: AdminListing[] }) {
             </div>
 
             <div className="flex flex-wrap items-center gap-2">
+              {onWarnOwner && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => onWarnOwner(l)}
+                >
+                  <MessageSquareWarning /> Sahibine uyar
+                </Button>
+              )}
               {l.status === "active" ? (
                 <form action={adminSetListingStatusAction}>
                   <input type="hidden" name="id" value={l.id} />

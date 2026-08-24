@@ -103,6 +103,28 @@ export async function unbanUserAction(formData: FormData) {
   revalidatePath("/moderation");
 }
 
+// Admin: kullanıcıya uyarı mesajı gönder (opsiyonel ilan bağlamı)
+export async function warnUserAction(
+  _prev: ReportState,
+  formData: FormData,
+): Promise<ReportState> {
+  const target = (formData.get("userId") as string) ?? "";
+  const message = ((formData.get("message") as string) ?? "").trim();
+  const listingId = (formData.get("listingId") as string) || null;
+  if (!target) return { error: "Kullanıcı bulunamadı." };
+  if (message.length < 3) return { error: "Lütfen bir uyarı mesajı yaz." };
+
+  const { supabase } = await requireUser();
+  const { error } = await supabase.rpc("admin_warn_user", {
+    target,
+    msg: message,
+    lst: listingId,
+  });
+  if (error) return { error: error.message };
+  revalidatePath("/moderation");
+  return { success: true };
+}
+
 async function requireAdmin() {
   const { supabase, user } = await requireUser();
   const { data } = await supabase

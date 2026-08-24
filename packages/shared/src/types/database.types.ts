@@ -300,6 +300,28 @@ export type Database = {
         Update: Partial<Database["public"]["Tables"]["blocks"]["Insert"]>;
         Relationships: [];
       };
+      user_warnings: {
+        Row: {
+          id: string;
+          user_id: string;
+          admin_id: string | null;
+          listing_id: string | null;
+          message: string;
+          created_at: string;
+          read_at: string | null;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          admin_id?: string | null;
+          listing_id?: string | null;
+          message: string;
+          created_at?: string;
+          read_at?: string | null;
+        };
+        Update: Partial<Database["public"]["Tables"]["user_warnings"]["Insert"]>;
+        Relationships: [];
+      };
     };
     Views: Record<never, never>;
     Functions: {
@@ -322,6 +344,28 @@ export type Database = {
       delete_own_account: {
         Args: Record<string, never>;
         Returns: undefined;
+      };
+      admin_warn_user: {
+        Args: { target: string; msg: string; lst?: string | null };
+        Returns: undefined;
+      };
+      admin_list_users: {
+        Args: { search?: string; filter?: string };
+        Returns: {
+          id: string;
+          full_name: string | null;
+          email: string;
+          university: string | null;
+          role: string | null;
+          is_admin: boolean;
+          banned: boolean;
+          banned_until: string | null;
+          points: number;
+          member_no: number | null;
+          created_at: string;
+          listing_count: number;
+          report_count: number;
+        }[];
       };
     };
     Enums: {
