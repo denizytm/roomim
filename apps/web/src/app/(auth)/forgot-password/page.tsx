@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
-import { Loader2, MailCheck } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Loader2, MailCheck, RefreshCw } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -22,12 +22,17 @@ export default function ForgotPasswordPage() {
   const [error, setError] = useState<string | null>(null);
   const [sent, setSent] = useState(false);
   const [pending, setPending] = useState(false);
+  const [cooldown, setCooldown] = useState(0);
 
-  async function onSubmit(e: React.FormEvent) {
-    e.preventDefault();
+  useEffect(() => {
+    if (cooldown <= 0) return;
+    const t = setTimeout(() => setCooldown((c) => c - 1), 1000);
+    return () => clearTimeout(t);
+  }, [cooldown]);
+
+  async function sendReset() {
     setError(null);
     setPending(true);
-
     const supabase = createClient();
     const siteUrl =
       process.env.NEXT_PUBLIC_SITE_URL ??
@@ -37,8 +42,19 @@ export default function ForgotPasswordPage() {
       { redirectTo: `${siteUrl}/auth/callback?next=/reset-password` },
     );
     setPending(false);
-    if (error) setError(error.message);
-    else setSent(true);
+    if (error) {
+      setError(error.message);
+      return false;
+    }
+    setCooldown(30); // 30 sn sonra tekrar gönderilebilir
+    return true;
+  }
+
+  function onSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    sendReset().then((ok) => {
+      if (ok) setSent(true);
+    });
   }
 
   if (sent) {
@@ -57,8 +73,17 @@ export default function ForgotPasswordPage() {
         </CardHeader>
         <CardContent className="space-y-3">
           <p className="text-sm text-muted-foreground">
-            Mail gelmediyse spam/gereksiz klasörünü kontrol et.
+            Mail gelmediyse spam/gereksiz klasörünü kontrol et ya da tekrar gönder.
           </p>
+          <Button className="w-full" onClick={() => sendReset()} disabled={pending || cooldown > 0}>
+            {pending ? <Loader2 className="animate-spin" /> : <RefreshCw />}
+            {cooldown > 0 ? `Tekrar gönder (${cooldown}s)` : "Sıfırlama mailini tekrar gönder"}
+          </Button>
+          {error && (
+            <p className="rounded-lg bg-destructive/10 px-3 py-2 text-sm text-destructive">
+              {error}
+            </p>
+          )}
           <Button variant="ghost" className="w-full" render={<Link href="/login" />}>
             Giriş ekranına dön
           </Button>
