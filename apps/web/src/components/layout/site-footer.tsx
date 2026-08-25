@@ -14,9 +14,15 @@ export function SiteFooter() {
           </p>
         </div>
         <div className="flex flex-col gap-2 sm:items-end">
-          <div className="flex gap-4">
+          <div className="flex flex-wrap gap-x-4 gap-y-1">
+            <Link href="/kosullar" className="text-xs font-medium hover:text-foreground">
+              Kullanıcı Sözleşmesi
+            </Link>
             <Link href="/gizlilik" className="text-xs font-medium hover:text-foreground">
               Gizlilik Politikası
+            </Link>
+            <Link href="/kvkk" className="text-xs font-medium hover:text-foreground">
+              KVKK
             </Link>
             <Link href="/hesap-sil" className="text-xs font-medium hover:text-foreground">
               Hesap Silme

@@ -1,10 +1,13 @@
+import { TERMS_VERSION } from "@roomim/shared/constants";
 import { emailDomain, registerSchema } from "@roomim/shared/validation/auth";
 import { Link, router } from "expo-router";
 import { useState } from "react";
 import {
   Alert,
   KeyboardAvoidingView,
+  Linking,
   Platform,
+  Pressable,
   ScrollView,
   Text,
   View,
@@ -20,6 +23,8 @@ export default function SignUp() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [password2, setPassword2] = useState("");
+  const [agreed, setAgreed] = useState(false);
+  const [marketing, setMarketing] = useState(false);
   const [loading, setLoading] = useState(false);
 
   async function submit() {
@@ -38,6 +43,13 @@ export default function SignUp() {
       Alert.alert("Şifreler eşleşmiyor", "Aynı şifreyi iki kez gir.");
       return;
     }
+    if (!agreed) {
+      Alert.alert(
+        "Onay gerekli",
+        "Devam etmek için Kullanıcı Sözleşmesi, Gizlilik Politikası ve KVKK Aydınlatma Metni'ni kabul etmelisin.",
+      );
+      return;
+    }
     setLoading(true);
     const domain = emailDomain(parsed.data.email);
     if (!domain || !domain.endsWith(".edu.tr")) {
@@ -48,7 +60,13 @@ export default function SignUp() {
     const { data, error } = await supabase.auth.signUp({
       email: parsed.data.email,
       password: parsed.data.password,
-      options: { data: { full_name: fullName } },
+      options: {
+        data: {
+          full_name: fullName,
+          terms_version: TERMS_VERSION,
+          marketing_consent: marketing,
+        },
+      },
     });
     setLoading(false);
     if (error) {
@@ -104,6 +122,46 @@ export default function SignUp() {
             secureTextEntry
           />
 
+          <View style={{ gap: 12, marginTop: 4 }}>
+            <View style={{ flexDirection: "row", alignItems: "flex-start", gap: 10 }}>
+              <Pressable onPress={() => setAgreed((v) => !v)} hitSlop={8}>
+                <CheckBox active={agreed} />
+              </Pressable>
+              <Text style={{ flex: 1, fontSize: 13, color: colors.muted, lineHeight: 19 }}>
+                <Text
+                  style={{ color: colors.primary, fontWeight: "700" }}
+                  onPress={() => Linking.openURL("https://roomim.com/kosullar")}
+                >
+                  Kullanıcı Sözleşmesi
+                </Text>
+                {", "}
+                <Text
+                  style={{ color: colors.primary, fontWeight: "700" }}
+                  onPress={() => Linking.openURL("https://roomim.com/gizlilik")}
+                >
+                  Gizlilik Politikası
+                </Text>
+                {" ve "}
+                <Text
+                  style={{ color: colors.primary, fontWeight: "700" }}
+                  onPress={() => Linking.openURL("https://roomim.com/kvkk")}
+                >
+                  KVKK Aydınlatma Metni
+                </Text>
+                {"'ni okudum, kabul ediyorum."}
+              </Text>
+            </View>
+
+            <View style={{ flexDirection: "row", alignItems: "flex-start", gap: 10 }}>
+              <Pressable onPress={() => setMarketing((v) => !v)} hitSlop={8}>
+                <CheckBox active={marketing} />
+              </Pressable>
+              <Text style={{ flex: 1, fontSize: 13, color: colors.muted, lineHeight: 19 }}>
+                Kampanya ve duyuru e-postaları almak istiyorum. (opsiyonel)
+              </Text>
+            </View>
+          </View>
+
           <Btn title="Onay maili gönder" onPress={submit} loading={loading} />
 
           <View style={{ flexDirection: "row", justifyContent: "center", gap: 6 }}>
@@ -115,5 +173,25 @@ export default function SignUp() {
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
+  );
+}
+
+function CheckBox({ active }: { active: boolean }) {
+  return (
+    <View
+      style={{
+        width: 20,
+        height: 20,
+        borderRadius: 5,
+        borderWidth: 2,
+        borderColor: active ? colors.primary : colors.border,
+        backgroundColor: active ? colors.primary : "transparent",
+        alignItems: "center",
+        justifyContent: "center",
+        marginTop: 1,
+      }}
+    >
+      {active && <Text style={{ color: "#fff", fontSize: 12, fontWeight: "800" }}>✓</Text>}
+    </View>
   );
 }

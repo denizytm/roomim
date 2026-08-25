@@ -51,6 +51,10 @@ export type Database = {
           banned: boolean;
           banned_until: string | null;
           expo_push_token: string | null;
+          terms_version: string | null;
+          terms_accepted_at: string | null;
+          marketing_consent: boolean;
+          marketing_consent_at: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -70,6 +74,10 @@ export type Database = {
           banned?: boolean;
           banned_until?: string | null;
           expo_push_token?: string | null;
+          terms_version?: string | null;
+          terms_accepted_at?: string | null;
+          marketing_consent?: boolean;
+          marketing_consent_at?: string | null;
           created_at?: string;
           updated_at?: string;
         };

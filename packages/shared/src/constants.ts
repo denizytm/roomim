@@ -1,5 +1,9 @@
 import type { UserRole } from "./types/database.types";
 
+// Kullanıcı Sözleşmesi / KVKK metinlerinin yürürlük versiyonu. Metinler
+// değiştiğinde bunu güncelle; kayıt anında kabul edilen versiyon saklanır.
+export const TERMS_VERSION = "2026-08-25";
+
 export const ROLE_LABELS: Record<UserRole, string> = {
   host: "Ev Sunan",
   seeker: "Ev Arayan",

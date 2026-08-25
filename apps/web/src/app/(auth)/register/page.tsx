@@ -14,9 +14,11 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { registerAction } from "@/features/auth/actions";
+import { TERMS_VERSION } from "@/lib/constants";
 import { createClient } from "@/lib/supabase/client";
 
 const EMPTY = { fullName: "", email: "", password: "", password2: "", referralCode: "" };
@@ -26,6 +28,8 @@ export default function RegisterPage() {
   const set = (key: keyof typeof EMPTY, value: string) =>
     setForm((prev) => ({ ...prev, [key]: value }));
 
+  const [agreed, setAgreed] = useState(false);
+  const [marketing, setMarketing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [sent, setSent] = useState(false);
   const [pending, startTransition] = useTransition();
@@ -50,11 +54,19 @@ export default function RegisterPage() {
       setError("Şifreler eşleşmiyor. Aynı şifreyi iki kez gir.");
       return;
     }
+    if (!agreed) {
+      setError(
+        "Devam etmek için Kullanıcı Sözleşmesi, Gizlilik Politikası ve KVKK Aydınlatma Metni'ni kabul etmelisin.",
+      );
+      return;
+    }
 
     const fd = new FormData();
     fd.set("fullName", form.fullName);
     fd.set("email", form.email);
     fd.set("password", form.password);
+    fd.set("termsVersion", TERMS_VERSION);
+    if (marketing) fd.set("marketing", "1");
     if (form.referralCode) fd.set("referralCode", form.referralCode);
 
     startTransition(async () => {
@@ -192,6 +204,43 @@ export default function RegisterPage() {
             />
           </div>
 
+          <div className="space-y-3 pt-1">
+            <div className="flex items-start gap-2.5 text-sm">
+              <Checkbox
+                checked={agreed}
+                onCheckedChange={(c) => setAgreed(c === true)}
+                className="mt-0.5"
+                aria-label="Sözleşmeleri kabul et"
+              />
+              <span className="text-muted-foreground">
+                <Link href="/kosullar" target="_blank" className="font-medium text-primary hover:underline">
+                  Kullanıcı Sözleşmesi
+                </Link>
+                ,{" "}
+                <Link href="/gizlilik" target="_blank" className="font-medium text-primary hover:underline">
+                  Gizlilik Politikası
+                </Link>{" "}
+                ve{" "}
+                <Link href="/kvkk" target="_blank" className="font-medium text-primary hover:underline">
+                  KVKK Aydınlatma Metni
+                </Link>
+                &apos;ni okudum, kabul ediyorum.
+              </span>
+            </div>
+            <div className="flex items-start gap-2.5 text-sm">
+              <Checkbox
+                checked={marketing}
+                onCheckedChange={(c) => setMarketing(c === true)}
+                className="mt-0.5"
+                aria-label="Kampanya e-postaları"
+              />
+              <span className="text-muted-foreground">
+                Kampanya ve duyuru e-postaları almak istiyorum.{" "}
+                <span className="text-xs">(opsiyonel)</span>
+              </span>
+            </div>
+          </div>
+
           {error && (
             <p className="rounded-lg bg-destructive/10 px-3 py-2 text-sm text-destructive">
               {error}
@@ -200,7 +249,7 @@ export default function RegisterPage() {
         </CardContent>
 
         <CardFooter className="mt-6 flex-col gap-3">
-          <Button type="submit" size="lg" className="w-full" disabled={pending}>
+          <Button type="submit" size="lg" className="w-full" disabled={pending || !agreed}>
             {pending && <Loader2 className="animate-spin" />}
             Onay maili gönder
           </Button>

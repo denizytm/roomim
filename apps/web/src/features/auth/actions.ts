@@ -52,7 +52,13 @@ export async function registerAction(
     password,
     options: {
       // Rol seçimi onboarding'e taşındı; burada göndermiyoruz.
-      data: { full_name: fullName, referral_code: referralCode ?? "" },
+      // Rıza bilgisi trigger tarafından profile'a yazılır.
+      data: {
+        full_name: fullName,
+        referral_code: referralCode ?? "",
+        terms_version: (formData.get("termsVersion") as string) || "",
+        marketing_consent: formData.get("marketing") === "1",
+      },
       emailRedirectTo: `${siteUrl}/auth/callback?next=/onboarding`,
     },
   });
