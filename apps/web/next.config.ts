@@ -10,7 +10,7 @@ const csp = [
   "default-src 'self'",
   "script-src 'self' 'unsafe-inline'",
   "style-src 'self' 'unsafe-inline'",
-  "img-src 'self' data: blob: https://*.supabase.co https://tile.openstreetmap.org https://picsum.photos",
+  "img-src 'self' data: blob: https://*.supabase.co https://tile.openstreetmap.org https://picsum.photos https://images.unsplash.com https://api.dicebear.com",
   "font-src 'self' data:",
   "connect-src 'self' https://*.supabase.co wss://*.supabase.co",
   "media-src 'self' blob: https://*.supabase.co",
@@ -44,8 +44,10 @@ const nextConfig: NextConfig = {
       { protocol: "https", hostname: "*.supabase.co" },
       { protocol: "http", hostname: "127.0.0.1" },
       { protocol: "http", hostname: "localhost" },
-      // Demo/örnek ilan görselleri için (geçici).
+      // Demo/örnek ilan görselleri + avatarları için (geçici — gerçek lansmanda kaldırılabilir).
       { protocol: "https", hostname: "picsum.photos" },
+      { protocol: "https", hostname: "images.unsplash.com" },
+      { protocol: "https", hostname: "api.dicebear.com" },
     ],
   },
   async headers() {
