@@ -2,7 +2,15 @@
 
 import Link from "next/link";
 import { useEffect, useState, useTransition } from "react";
-import { Loader2, MailCheck, Pencil, RefreshCw } from "lucide-react";
+import {
+  CheckCircle2,
+  ChevronRight,
+  FileText,
+  Loader2,
+  MailCheck,
+  Pencil,
+  RefreshCw,
+} from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -18,6 +26,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { registerAction } from "@/features/auth/actions";
+import { ConsentFlow } from "@/features/legal/consent-flow";
 import { TERMS_VERSION } from "@/lib/constants";
 import { createClient } from "@/lib/supabase/client";
 
@@ -29,6 +38,7 @@ export default function RegisterPage() {
     setForm((prev) => ({ ...prev, [key]: value }));
 
   const [agreed, setAgreed] = useState(false);
+  const [consentOpen, setConsentOpen] = useState(false);
   const [marketing, setMarketing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [sent, setSent] = useState(false);
@@ -131,7 +141,8 @@ export default function RegisterPage() {
   }
 
   return (
-    <Card>
+    <>
+      <Card>
       <CardHeader>
         <CardTitle className="text-2xl">Kayıt ol</CardTitle>
         <CardDescription>
@@ -205,28 +216,36 @@ export default function RegisterPage() {
           </div>
 
           <div className="space-y-3 pt-1">
-            <div className="flex items-start gap-2.5 text-sm">
-              <Checkbox
-                checked={agreed}
-                onCheckedChange={(c) => setAgreed(c === true)}
-                className="mt-0.5"
-                aria-label="Sözleşmeleri kabul et"
-              />
-              <span className="text-muted-foreground">
-                <Link href="/kosullar" target="_blank" className="font-medium text-primary hover:underline">
-                  Kullanıcı Sözleşmesi
-                </Link>
-                ,{" "}
-                <Link href="/gizlilik" target="_blank" className="font-medium text-primary hover:underline">
-                  Gizlilik Politikası
-                </Link>{" "}
-                ve{" "}
-                <Link href="/kvkk" target="_blank" className="font-medium text-primary hover:underline">
-                  KVKK Aydınlatma Metni
-                </Link>
-                &apos;ni okudum, kabul ediyorum.
-              </span>
-            </div>
+            {agreed ? (
+              <div className="flex items-center gap-2 rounded-lg border border-primary/30 bg-primary/5 px-3 py-2.5 text-sm">
+                <CheckCircle2 className="size-4 shrink-0 text-primary" />
+                <span className="flex-1 text-foreground">
+                  Kullanıcı Sözleşmesi, Gizlilik ve KVKK kabul edildi.
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setConsentOpen(true)}
+                  className="text-xs font-medium text-primary hover:underline"
+                >
+                  Tekrar oku
+                </button>
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={() => setConsentOpen(true)}
+                className="flex w-full items-start gap-2.5 rounded-lg border border-dashed border-border px-3 py-2.5 text-left text-sm transition-colors hover:border-primary/50 hover:bg-muted"
+              >
+                <FileText className="mt-0.5 size-4 shrink-0 text-primary" />
+                <span className="flex-1 text-muted-foreground">
+                  <span className="font-medium text-foreground">
+                    Kullanıcı Sözleşmesi, Gizlilik Politikası ve KVKK Aydınlatma Metni
+                  </span>
+                  &apos;ni oku ve kabul et
+                </span>
+                <ChevronRight className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
+              </button>
+            )}
             <div className="flex items-start gap-2.5 text-sm">
               <Checkbox
                 checked={marketing}
@@ -261,6 +280,18 @@ export default function RegisterPage() {
           </p>
         </CardFooter>
       </form>
-    </Card>
+      </Card>
+
+      {consentOpen && (
+        <ConsentFlow
+          onClose={() => setConsentOpen(false)}
+          onComplete={() => {
+            setAgreed(true);
+            setConsentOpen(false);
+            setError(null);
+          }}
+        />
+      )}
+    </>
   );
 }

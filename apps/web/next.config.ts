@@ -12,7 +12,7 @@ const csp = [
   "style-src 'self' 'unsafe-inline'",
   "img-src 'self' data: blob: https://*.supabase.co https://tile.openstreetmap.org https://picsum.photos https://images.unsplash.com https://api.dicebear.com",
   "font-src 'self' data:",
-  "connect-src 'self' https://*.supabase.co wss://*.supabase.co",
+  "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://tile.openstreetmap.org",
   "media-src 'self' blob: https://*.supabase.co",
   "worker-src 'self' blob:",
   "frame-ancestors 'none'",
