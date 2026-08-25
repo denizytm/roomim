@@ -164,10 +164,7 @@ export function PrivacyBody() {
       </section>
       <section>
         <h2 className="mb-2 text-lg font-semibold">3. Verilerin paylaşımı</h2>
-        <p>
-          Verilerini <strong>satmayız.</strong> Yalnızca hizmetin çalışması için gereken hizmet
-          sağlayıcılarla paylaşılır:
-        </p>
+        <p>Verilerin, hizmetin çalışması için gereken hizmet sağlayıcılarla paylaşılır:</p>
         <ul className="mt-2 list-disc space-y-1 pl-5">
           <li>
             <strong>Supabase</strong> (veritabanı, kimlik doğrulama, dosya depolama) — AB
@@ -317,8 +314,7 @@ export function KvkkBody() {
       <section>
         <h2 className="mb-2 text-lg font-semibold">4. Aktarım</h2>
         <p>
-          Kişisel verilerin <strong>satılmaz.</strong> Yalnızca hizmetin sunulması için gerekli
-          hizmet sağlayıcılarla paylaşılır:
+          Kişisel verilerin, hizmetin sunulması için gerekli hizmet sağlayıcılarla paylaşılır:
         </p>
         <ul className="mt-2 list-disc space-y-1 pl-5">
           <li>
