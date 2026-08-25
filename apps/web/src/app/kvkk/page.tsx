@@ -13,25 +13,25 @@ export default function KvkkPage() {
 
       <div className="mt-4 rounded-xl border border-amber-300/60 bg-amber-50 px-4 py-3 text-sm text-amber-900">
         Bu metin taslaktır; yayına almadan önce bir hukuk danışmanına inceletmen, kalan resmi
-        bilgileri (<strong>[TAM TİCARİ UNVAN]</strong>, <strong>[MERSİS NO]</strong>,{" "}
-        <strong>[VERGİ DAİRESİ / VERGİ NO]</strong>) doldurman ve VERBIS kayıt yükümlülüğünü
-        teyit etmen önerilir.
+        bilgileri (<strong>[MERSİS NO]</strong>, <strong>[VERGİ DAİRESİ / VERGİ NO]</strong>)
+        doldurman ve VERBIS kayıt yükümlülüğünü teyit etmen önerilir.
       </div>
 
       <div className="mt-8 space-y-8 text-sm leading-relaxed text-foreground/90">
         <section>
           <p>
             6698 sayılı Kişisel Verilerin Korunması Kanunu (&quot;KVKK&quot;) uyarınca, veri
-            sorumlusu sıfatıyla <strong>HC Dijital</strong> (&quot;Roomim&quot;) tarafından
-            kişisel verilerinin nasıl işlendiği aşağıda açıklanmıştır.
+            sorumlusu sıfatıyla{" "}
+            <strong>HC Dijital Sağlık Teknolojileri Sanayi Ticaret Limited Şirketi</strong>{" "}
+            (&quot;Roomim&quot;) tarafından kişisel verilerinin nasıl işlendiği aşağıda
+            açıklanmıştır.
           </p>
         </section>
 
         <section>
           <h2 className="mb-2 text-lg font-semibold">1. Veri sorumlusu</h2>
           <p>
-            <strong>HC Dijital</strong> (tam ticari unvan:{" "}
-            <strong>[TAM TİCARİ UNVAN — … Ltd. Şti.]</strong>)
+            <strong>HC Dijital Sağlık Teknolojileri Sanayi Ticaret Limited Şirketi</strong>
           </p>
           <ul className="mt-2 list-disc space-y-1 pl-5">
             <li>

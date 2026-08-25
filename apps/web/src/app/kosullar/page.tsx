@@ -12,15 +12,15 @@ export default function TermsPage() {
       <p className="mt-2 text-sm text-muted-foreground">Son güncelleme: {updated}</p>
 
       <div className="mt-4 rounded-xl border border-amber-300/60 bg-amber-50 px-4 py-3 text-sm text-amber-900">
-        Bu metin taslaktır; yayına almadan önce bir hukuk danışmanına inceletmen ve kalan resmi
-        bilgileri (<strong>[TAM TİCARİ UNVAN]</strong>) doldurman önerilir.
+        Bu metin taslaktır; yayına almadan önce bir hukuk danışmanına inceletmen önerilir.
       </div>
 
       <div className="mt-8 space-y-8 text-sm leading-relaxed text-foreground/90">
         <section>
           <h2 className="mb-2 text-lg font-semibold">1. Taraflar ve kapsam</h2>
           <p>
-            Bu Kullanıcı Sözleşmesi (&quot;Sözleşme&quot;), <strong>HC Dijital</strong>{" "}
+            Bu Kullanıcı Sözleşmesi (&quot;Sözleşme&quot;),{" "}
+            <strong>HC Dijital Sağlık Teknolojileri Sanayi Ticaret Limited Şirketi</strong>{" "}
             (&quot;Roomim&quot;, &quot;biz&quot;) tarafından işletilen Roomim mobil uygulaması ve{" "}
             <strong>roomim.com</strong> web sitesi (&quot;Platform&quot;) ile bu Platform&apos;u
             kullanan kişi (&quot;Kullanıcı&quot;, &quot;sen&quot;) arasında düzenlenmiştir.
@@ -118,16 +118,15 @@ export default function TermsPage() {
           <h2 className="mb-2 text-lg font-semibold">10. Uygulanacak hukuk ve iletişim</h2>
           <p>
             Bu Sözleşme Türkiye Cumhuriyeti hukukuna tabidir; uyuşmazlıklarda{" "}
-            <strong>İstanbul (Sarıyer) Mahkemeleri ve İcra Daireleri</strong> yetkilidir.
-            İletişim:{" "}
+            <strong>İstanbul Mahkemeleri ve İcra Daireleri</strong> yetkilidir. İletişim:{" "}
             <a
               href="mailto:destek@roomim.com"
               className="font-medium text-primary hover:underline"
             >
               destek@roomim.com
             </a>{" "}
-            · <strong>HC Dijital</strong> — Ayazağa, Vadis Istanbul Park Etabı, Kemerburgaz Cad.
-            D:7A Blok, 34396 Sarıyer/İstanbul.
+            · <strong>HC Dijital Sağlık Teknolojileri San. Tic. Ltd. Şti.</strong> — Ayazağa
+            Mah., Kemerburgaz Cad., Vadis Istanbul Park, 7A Blok, 34396 Sarıyer/İstanbul.
           </p>
         </section>
       </div>
