@@ -12,16 +12,17 @@ export default function KvkkPage() {
       <p className="mt-2 text-sm text-muted-foreground">Son güncelleme: {updated}</p>
 
       <div className="mt-4 rounded-xl border border-amber-300/60 bg-amber-50 px-4 py-3 text-sm text-amber-900">
-        Bu metin taslaktır; yayına almadan önce bir hukuk danışmanına inceletmen,{" "}
-        <strong>[ŞİRKET ADI]</strong> gibi yer tutucuları doldurman ve VERBIS kayıt
-        yükümlülüğünü teyit etmen önerilir.
+        Bu metin taslaktır; yayına almadan önce bir hukuk danışmanına inceletmen, kalan resmi
+        bilgileri (<strong>[TAM TİCARİ UNVAN]</strong>, <strong>[MERSİS NO]</strong>,{" "}
+        <strong>[VERGİ DAİRESİ / VERGİ NO]</strong>) doldurman ve VERBIS kayıt yükümlülüğünü
+        teyit etmen önerilir.
       </div>
 
       <div className="mt-8 space-y-8 text-sm leading-relaxed text-foreground/90">
         <section>
           <p>
             6698 sayılı Kişisel Verilerin Korunması Kanunu (&quot;KVKK&quot;) uyarınca, veri
-            sorumlusu sıfatıyla <strong>[ŞİRKET ADI]</strong> (&quot;Roomim&quot;) tarafından
+            sorumlusu sıfatıyla <strong>HC Dijital</strong> (&quot;Roomim&quot;) tarafından
             kişisel verilerinin nasıl işlendiği aşağıda açıklanmıştır.
           </p>
         </section>
@@ -29,15 +30,35 @@ export default function KvkkPage() {
         <section>
           <h2 className="mb-2 text-lg font-semibold">1. Veri sorumlusu</h2>
           <p>
-            <strong>[ŞİRKET ADI]</strong> · <strong>[ADRES]</strong> ·{" "}
-            <strong>[MERSİS/VERGİ NO]</strong> · İletişim:{" "}
-            <a
-              href="mailto:destek@roomim.com"
-              className="font-medium text-primary hover:underline"
-            >
-              destek@roomim.com
-            </a>
+            <strong>HC Dijital</strong> (tam ticari unvan:{" "}
+            <strong>[TAM TİCARİ UNVAN — … Ltd. Şti.]</strong>)
           </p>
+          <ul className="mt-2 list-disc space-y-1 pl-5">
+            <li>
+              <strong>Adres:</strong> Ayazağa, Vadis Istanbul Park Etabı, Kemerburgaz Cad. D:7A
+              Blok, 34396 Sarıyer/İstanbul
+            </li>
+            <li>
+              <strong>MERSİS No:</strong> [MERSİS NO] · <strong>Vergi:</strong>{" "}
+              [VERGİ DAİRESİ / VERGİ NO]
+            </li>
+            <li>
+              <strong>İletişim:</strong>{" "}
+              <a
+                href="mailto:info@hcdijital.com.tr"
+                className="font-medium text-primary hover:underline"
+              >
+                info@hcdijital.com.tr
+              </a>{" "}
+              ·{" "}
+              <a
+                href="mailto:destek@roomim.com"
+                className="font-medium text-primary hover:underline"
+              >
+                destek@roomim.com
+              </a>
+            </li>
+          </ul>
         </section>
 
         <section>
