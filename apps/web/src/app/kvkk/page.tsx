@@ -13,8 +13,7 @@ export default function KvkkPage() {
 
       <div className="mt-4 rounded-xl border border-amber-300/60 bg-amber-50 px-4 py-3 text-sm text-amber-900">
         Bu metin taslaktır; yayına almadan önce bir hukuk danışmanına inceletmen ve VERBIS
-        kayıt yükümlülüğünü teyit etmen önerilir. (MERSİS/vergi no gibi ek bilgiler istenirse
-        sonradan eklenebilir.)
+        kayıt yükümlülüğünü teyit etmen önerilir.
       </div>
 
       <div className="mt-8 space-y-8 text-sm leading-relaxed text-foreground/90">
@@ -37,6 +36,10 @@ export default function KvkkPage() {
             <li>
               <strong>Adres:</strong> Ayazağa, Vadis Istanbul Park Etabı, Kemerburgaz Cad. D:7A
               Blok, 34396 Sarıyer/İstanbul
+            </li>
+            <li>
+              <strong>MERSİS No:</strong> 0461107070200001 ·{" "}
+              <strong>Ticaret Sicil No:</strong> 416076-5 (İstanbul Ticaret Sicili)
             </li>
             <li>
               <strong>İletişim:</strong>{" "}
