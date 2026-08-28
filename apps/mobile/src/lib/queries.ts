@@ -522,6 +522,20 @@ export async function getConversationDetail(
       });
   }
 
+  // Ekli mesajlar için signed URL üret (private chat-media).
+  const attachPaths = (messages ?? [])
+    .map((m) => m.attachment_url)
+    .filter((p): p is string => !!p);
+  const signedMap = new Map<string, string>();
+  if (attachPaths.length > 0) {
+    const { data: signed } = await supabase.storage
+      .from("chat-media")
+      .createSignedUrls(attachPaths, 3600);
+    (signed ?? []).forEach((s) => {
+      if (s.path && s.signedUrl) signedMap.set(s.path, s.signedUrl);
+    });
+  }
+
   return {
     status: conv.status,
     isHost,
@@ -536,7 +550,7 @@ export async function getConversationDetail(
       id: m.id,
       sender_id: m.sender_id,
       body: m.body,
-      attachmentUrl: m.attachment_url,
+      attachmentUrl: m.attachment_url ? (signedMap.get(m.attachment_url) ?? null) : null,
       attachmentType: m.attachment_type,
     })),
     otherScore,
@@ -560,32 +574,44 @@ export async function sendMessage(
   if (error) throw error;
 }
 
-// Sohbet görselini (base64) chat-media bucket'ına yükle, public URL döndür.
+// Private chat-media için signed URL üret (gösterim/realtime).
+export async function chatMediaSignedUrl(path: string): Promise<string | null> {
+  const { data } = await supabase.storage.from("chat-media").createSignedUrl(path, 3600);
+  return data?.signedUrl ?? null;
+}
+
+// Sohbet görselini (base64) chat-media'ya yükle; PATH döndür (private bucket).
+// Yol {conversationId}/... — RLS erişimi konuşma katılımcılığıyla eşler.
 export async function uploadChatImage(
+  convId: string,
   userId: string,
   base64: string,
   ext: string,
 ): Promise<string> {
   const { decode } = await import("base64-arraybuffer");
-  const path = `${userId}/${Date.now()}-${Math.floor(Math.random() * 1e6)}.${ext}`;
+  const path = `${convId}/${userId}-${Date.now()}-${Math.floor(Math.random() * 1e6)}.${ext}`;
   const contentType = ext === "png" ? "image/png" : "image/jpeg";
   const { error } = await supabase.storage
     .from("chat-media")
     .upload(path, decode(base64), { contentType });
   if (error) throw error;
-  return publicImageUrl("chat-media", path)!;
+  return path;
 }
 
-// Kaydedilen ses dosyasını (file:// uri) chat-media'ya yükle, public URL döndür.
-export async function uploadChatAudio(userId: string, uri: string): Promise<string> {
+// Kaydedilen ses dosyasını (file:// uri) chat-media'ya yükle; PATH döndür.
+export async function uploadChatAudio(
+  convId: string,
+  userId: string,
+  uri: string,
+): Promise<string> {
   const res = await fetch(uri);
   const bytes = await res.arrayBuffer();
-  const path = `${userId}/${Date.now()}-${Math.floor(Math.random() * 1e6)}.m4a`;
+  const path = `${convId}/${userId}-${Date.now()}-${Math.floor(Math.random() * 1e6)}.m4a`;
   const { error } = await supabase.storage
     .from("chat-media")
     .upload(path, bytes, { contentType: "audio/mp4" });
   if (error) throw error;
-  return publicImageUrl("chat-media", path)!;
+  return path;
 }
 
 export async function setConversationStatus(

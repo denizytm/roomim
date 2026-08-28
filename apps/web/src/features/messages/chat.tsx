@@ -52,6 +52,9 @@ export function Chat({
   initialMessages,
 }: Props) {
   const [messages, setMessages] = useState<Message[]>(initialMessages);
+  // Private bucket: attachment_url artık bir PATH; gösterim için signed URL üretilir.
+  const [mediaUrls, setMediaUrls] = useState<Record<string, string>>({});
+  const resolvedRef = useRef<Set<string>>(new Set());
   const [body, setBody] = useState("");
   const [sending, setSending] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -107,6 +110,31 @@ export function Chat({
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages.length]);
 
+  // Ekli mesajlar için signed URL üret (private chat-media).
+  useEffect(() => {
+    const paths = messages
+      .filter((m) => m.attachment_url && !resolvedRef.current.has(m.attachment_url))
+      .map((m) => m.attachment_url as string);
+    if (paths.length === 0) return;
+    paths.forEach((p) => resolvedRef.current.add(p));
+    const supabase = createClient();
+    let active = true;
+    (async () => {
+      const { data } = await supabase.storage
+        .from("chat-media")
+        .createSignedUrls(paths, 3600);
+      if (!active || !data) return;
+      const resolved: Record<string, string> = {};
+      for (const d of data) {
+        if (d.path && d.signedUrl) resolved[d.path] = d.signedUrl;
+      }
+      setMediaUrls((prev) => ({ ...prev, ...resolved }));
+    })();
+    return () => {
+      active = false;
+    };
+  }, [messages]);
+
   async function send() {
     const text = body.trim();
     if (!text) return;
@@ -128,7 +156,8 @@ export function Chat({
   async function uploadAndSend(file: Blob, type: "image" | "audio", ext: string) {
     setUploading(true);
     const supabase = createClient();
-    const path = `${meId}/${Date.now()}-${Math.floor(Math.random() * 1e6)}.${ext}`;
+    // Yol düzeni {conversationId}/... — RLS erişimi konuşma katılımcılığıyla eşler.
+    const path = `${conversationId}/${meId}-${Date.now()}-${Math.floor(Math.random() * 1e6)}.${ext}`;
     const { error: upErr } = await supabase.storage
       .from("chat-media")
       .upload(path, file, { contentType: file.type || undefined });
@@ -137,12 +166,12 @@ export function Chat({
       toast.error("Yükleme başarısız: " + upErr.message);
       return;
     }
-    const { data } = supabase.storage.from("chat-media").getPublicUrl(path);
+    // Private bucket: public URL değil, PATH saklanır; gösterimde signed URL üretilir.
     const { error } = await supabase.from("messages").insert({
       conversation_id: conversationId,
       sender_id: meId,
       body: "",
-      attachment_url: data.publicUrl,
+      attachment_url: path,
       attachment_type: type,
     });
     setUploading(false);
@@ -310,15 +339,27 @@ export function Chat({
                       : "rounded-bl-sm bg-muted text-foreground",
                   )}
                 >
-                  {m.attachment_type === "image" && m.attachment_url ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      src={m.attachment_url}
-                      alt="Görsel"
-                      className="max-h-64 rounded-xl object-cover"
-                    />
-                  ) : m.attachment_type === "audio" && m.attachment_url ? (
-                    <audio controls src={m.attachment_url} className="h-10 w-56 max-w-full" />
+                  {m.attachment_type && m.attachment_url ? (
+                    mediaUrls[m.attachment_url] ? (
+                      m.attachment_type === "image" ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          src={mediaUrls[m.attachment_url]}
+                          alt="Görsel"
+                          className="max-h-64 rounded-xl object-cover"
+                        />
+                      ) : (
+                        <audio
+                          controls
+                          src={mediaUrls[m.attachment_url]}
+                          className="h-10 w-56 max-w-full"
+                        />
+                      )
+                    ) : (
+                      <div className="flex h-10 w-40 items-center justify-center">
+                        <Loader2 className="size-4 animate-spin opacity-60" />
+                      </div>
+                    )
                   ) : (
                     m.body
                   )}

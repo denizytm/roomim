@@ -30,6 +30,7 @@ import { publicImageUrl } from "@/lib/storage";
 import {
   closeListing,
   getConversationDetail,
+  chatMediaSignedUrl,
   sendMessage,
   setConversationStatus,
   uploadChatAudio,
@@ -71,8 +72,18 @@ export default function ChatScreen() {
   }, [id, meId]);
 
   useEffect(() => {
-    load();
-  }, [load]);
+    let active = true;
+    (async () => {
+      if (!id || !meId) return;
+      const d = await getConversationDetail(id, meId);
+      if (!active) return;
+      setDetail(d);
+      setMessages(d?.messages ?? []);
+    })();
+    return () => {
+      active = false;
+    };
+  }, [id, meId]);
 
   // Realtime
   useEffect(() => {
@@ -90,20 +101,27 @@ export default function ChatScreen() {
             attachment_url: string | null;
             attachment_type: string | null;
           };
-          setMessages((prev) =>
-            prev.some((x) => x.id === m.id)
-              ? prev
-              : [
-                  ...prev,
-                  {
-                    id: m.id,
-                    sender_id: m.sender_id,
-                    body: m.body,
-                    attachmentUrl: m.attachment_url,
-                    attachmentType: m.attachment_type,
-                  },
-                ],
-          );
+          const add = (attachmentUrl: string | null) =>
+            setMessages((prev) =>
+              prev.some((x) => x.id === m.id)
+                ? prev
+                : [
+                    ...prev,
+                    {
+                      id: m.id,
+                      sender_id: m.sender_id,
+                      body: m.body,
+                      attachmentUrl,
+                      attachmentType: m.attachment_type,
+                    },
+                  ],
+            );
+          // Private chat-media: ekli mesaj için signed URL üret, sonra ekle.
+          if (m.attachment_url) {
+            chatMediaSignedUrl(m.attachment_url).then(add);
+          } else {
+            add(null);
+          }
         },
       )
       .subscribe();
@@ -138,8 +156,8 @@ export default function ChatScreen() {
     const ext = (asset.uri.split(".").pop() || "jpg").toLowerCase().replace(/[^a-z]/g, "") || "jpg";
     setUploading(true);
     try {
-      const url = await uploadChatImage(meId, asset.base64!, ext);
-      await sendMessage(id, meId, "", { url, type: "image" });
+      const path = await uploadChatImage(id, meId, asset.base64!, ext);
+      await sendMessage(id, meId, "", { url: path, type: "image" });
     } catch (e) {
       Alert.alert("Hata", e instanceof Error ? e.message : "Görsel gönderilemedi");
     }
@@ -155,8 +173,8 @@ export default function ChatScreen() {
         const uri = recorder.uri;
         if (!uri) return;
         setUploading(true);
-        const url = await uploadChatAudio(meId, uri);
-        await sendMessage(id, meId, "", { url, type: "audio" });
+        const path = await uploadChatAudio(id, meId, uri);
+        await sendMessage(id, meId, "", { url: path, type: "audio" });
       } catch (e) {
         Alert.alert("Hata", e instanceof Error ? e.message : "Ses gönderilemedi");
       }
