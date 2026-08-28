@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import {
   ArrowRight,
   BadgeCheck,
@@ -13,6 +14,7 @@ import {
 import { FadeIn } from "@/components/motion/fade-in";
 import { MobileBetaLinks } from "@/components/mobile-beta";
 import { Button } from "@/components/ui/button";
+import { createClient } from "@/lib/supabase/server";
 
 const TRUST = [
   {
@@ -50,7 +52,14 @@ const STEPS = [
   },
 ];
 
-export default function HomePage() {
+export default async function HomePage() {
+  // Giriş yapmış kullanıcıyı pazarlama sayfası yerine doğrudan uygulamaya al.
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (user) redirect("/listings");
+
   return (
     <div className="flex flex-col">
       {/* Hero */}
