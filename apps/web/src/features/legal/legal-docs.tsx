@@ -296,18 +296,18 @@ export function KvkkBody() {
         <ul className="list-disc space-y-1 pl-5">
           <li>
             Üyelik oluşturma, hizmetin sunulması, eşleştirme ve ilan gösterimi —{" "}
-            <em>sözleşmenin kurulması ve ifası (KVKK m.5/2-c).</em>
+            <em>hizmeti sana sunabilmek (sözleşmenin ifası).</em>
           </li>
           <li>
             Üniversite e-postasının doğrulanması, güvenlik ve kötüye kullanımın önlenmesi —{" "}
-            <em>meşru menfaat ve hukuki yükümlülük (KVKK m.5/2-e, f).</em>
+            <em>meşru menfaatimiz ve hukuki yükümlülüklerimiz gereği.</em>
           </li>
           <li>
             Hesap ve işlem e-postalarının gönderimi — <em>sözleşmenin ifası.</em>
           </li>
           <li>
-            Kampanya / duyuru e-postaları (talep edersen) — <em>açık rızan (KVKK m.5/1).</em> Bu
-            rızanı dilediğin zaman geri alabilirsin.
+            Kampanya / duyuru e-postaları (talep edersen) — <em>açık rızanla.</em> Bu rızanı
+            dilediğin zaman geri alabilirsin.
           </li>
         </ul>
       </section>
@@ -342,7 +342,7 @@ export function KvkkBody() {
         </p>
       </section>
       <section>
-        <h2 className="mb-2 text-lg font-semibold">6. Haklarınız (KVKK m.11)</h2>
+        <h2 className="mb-2 text-lg font-semibold">6. Haklarınız</h2>
         <p>
           Kişisel verilerine erişme, düzeltme, silme, işlemeye itiraz etme ve aktarımı öğrenme
           haklarına sahipsin. Taleplerini uygulama içindeki <strong>Destek / Şikayet</strong>{" "}
