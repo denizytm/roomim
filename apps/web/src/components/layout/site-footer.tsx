@@ -24,6 +24,9 @@ export function SiteFooter() {
             <Link href="/kvkk" className="text-xs font-medium hover:text-foreground">
               KVKK
             </Link>
+            <Link href="/cerez" className="text-xs font-medium hover:text-foreground">
+              Çerez Politikası
+            </Link>
             <Link href="/hesap-sil" className="text-xs font-medium hover:text-foreground">
               Hesap Silme
             </Link>
