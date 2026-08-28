@@ -371,6 +371,12 @@ export function KvkkBody() {
           halinde yetkili kurumlarla paylaşım yapılabilir. Bazı sağlayıcılar yurt dışında
           bulunabilir; bu tür aktarımlar KVKK&apos;nın öngördüğü şartlar çerçevesinde yapılır.
         </p>
+        <p className="mt-2">
+          <strong>Reklam ve pazarlama:</strong> Kişisel verilerini reklam veya pazarlama amacıyla
+          üçüncü kuruluşlara <strong>satmıyor veya paylaşmıyoruz.</strong> İleride reklam (ör.
+          Google reklamları) sunmaya başlarsak, bu metni güncelleyecek ve gereken hallerde{" "}
+          <strong>açık rızanı</strong> alacağız.
+        </p>
       </section>
 
       <section>
@@ -497,7 +503,9 @@ export function PrivacyBody() {
           (e-posta), <strong>bildirim altyapıları</strong> (Expo/Google/Apple, yalnızca izinliyse),
           sunucu/barındırma sağlayıcısı ve harita için <strong>OpenStreetMap</strong>. Profil ve
           ilan bilgilerin yalnızca eşleştiğin/iletişim kurduğun diğer kullanıcılara gösterilir. Ev
-          adresi asla otomatik paylaşılmaz.
+          adresi asla otomatik paylaşılmaz. Verilerini reklam/pazarlama amacıyla üçüncü
+          kuruluşlara <strong>satmıyor veya paylaşmıyoruz</strong>; ileride reklam eklersek metni
+          güncelleyip gereken hallerde açık rızanı alırız.
         </p>
       </section>
 
