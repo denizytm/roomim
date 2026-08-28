@@ -6,10 +6,12 @@ import {
   Heart,
   MessageCircleHeart,
   ShieldCheck,
+  Smartphone,
   Sparkles,
 } from "lucide-react";
 
 import { FadeIn } from "@/components/motion/fade-in";
+import { MobileBetaLinks } from "@/components/mobile-beta";
 import { Button } from "@/components/ui/button";
 
 const TRUST = [
@@ -60,7 +62,7 @@ export default function HomePage() {
         <div className="mx-auto flex max-w-6xl flex-col items-center px-4 py-20 text-center sm:py-28">
           <FadeIn>
             <span className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/10 px-4 py-1.5 text-sm font-medium text-primary">
-              <Sparkles className="size-4" /> ODTÜ Kapalı Beta · Ankara
+              <Sparkles className="size-4" /> Beta sürüm · Üniversiteliler için
             </span>
           </FadeIn>
 
@@ -131,6 +133,25 @@ export default function HomePage() {
             </FadeIn>
           ))}
         </div>
+      </section>
+
+      {/* Mobil beta */}
+      <section className="mx-auto w-full max-w-6xl px-4 pb-8">
+        <FadeIn>
+          <div className="flex flex-col items-center gap-5 rounded-3xl border border-border bg-card px-6 py-12 text-center">
+            <span className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-4 py-1.5 text-sm font-medium text-primary">
+              <Smartphone className="size-4" /> Yakında mobilde
+            </span>
+            <h2 className="text-3xl font-bold tracking-tight text-balance">
+              Roomim cebinde
+            </h2>
+            <p className="max-w-lg text-muted-foreground">
+              Mobil uygulama şu an <strong>beta testte.</strong> iOS ve Android&apos;de hemen
+              denemek istersen aşağıdaki test bağlantılarını kullan.
+            </p>
+            <MobileBetaLinks className="justify-center" />
+          </div>
+        </FadeIn>
       </section>
 
       {/* CTA */}

@@ -15,8 +15,9 @@ export function Logo({
       <span className="grid size-8 place-items-center rounded-xl bg-primary text-primary-foreground shadow-sm">
         <HousePlus className="size-5" />
       </span>
-      <span className="text-lg font-bold tracking-tight text-foreground">
-        Roomim
+      <span className="text-lg font-bold tracking-tight text-foreground">Roomim</span>
+      <span className="rounded-full bg-primary/10 px-1.5 py-0.5 text-[10px] font-bold uppercase leading-none tracking-wider text-primary">
+        Beta
       </span>
     </Link>
   );
