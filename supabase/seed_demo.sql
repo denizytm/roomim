@@ -35,7 +35,7 @@ begin
       u->>'email', extensions.crypt('Demo1234!', extensions.gen_salt('bf')),
       now(), now(), now(),
       '{"provider":"email","providers":["email"]}'::jsonb,
-      jsonb_build_object('full_name', u->>'name', 'role', u->>'role'),
+      jsonb_build_object('full_name', u->>'name', 'role', u->>'role', 'marketing_consent', false),
       '', '', '', '', ''
     ) returning id into uid;
 

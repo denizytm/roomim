@@ -23,7 +23,7 @@ export default function AppLayout() {
     <>
       {onboarded && <RealtimeNotifications />}
       {onboarded && <WarningsGate />}
-      <Stack screenOptions={{ headerShown: false }}>
+      <Stack screenOptions={{ headerShown: false, headerBackButtonDisplayMode: "minimal" }}>
         <Stack.Protected guard={!onboarded}>
         <Stack.Screen name="onboarding" />
       </Stack.Protected>
