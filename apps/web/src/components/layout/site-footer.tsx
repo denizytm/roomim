@@ -22,6 +22,9 @@ export function SiteFooter() {
         </div>
         <div className="flex flex-col gap-2 sm:items-end">
           <div className="flex flex-wrap gap-x-4 gap-y-1">
+            <Link href="/destek" className="text-xs font-medium hover:text-foreground">
+              Destek
+            </Link>
             <Link href="/kosullar" className="text-xs font-medium hover:text-foreground">
               Kullanıcı Sözleşmesi
             </Link>
