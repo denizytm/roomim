@@ -15,7 +15,7 @@ export function ListingCard({ listing }: { listing: ListingWithPhotos }) {
   return (
     <Link
       href={`/listings/${listing.id}`}
-      className="group block overflow-hidden rounded-2xl border border-border bg-card shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md"
+      className="group block overflow-hidden rounded-3xl bg-card shadow-[0_4px_20px_-6px_rgb(154_52_18/0.15)] ring-1 ring-foreground/[0.05] transition-all hover:-translate-y-1 hover:shadow-[0_12px_30px_-8px_rgb(154_52_18/0.25)]"
     >
       <div className="relative aspect-[4/3] overflow-hidden bg-muted">
         {cover ? (

@@ -9,6 +9,8 @@ import {
 } from "@/features/messages/queries";
 import { requireOnboardedProfile } from "@/lib/auth";
 import { AVATAR_BUCKET, publicImageUrl } from "@/lib/supabase/storage";
+import { EmptyState } from "@/components/empty-state";
+import { PageHeader } from "@/components/layout/page-header";
 
 export const metadata = { title: "Mesajlar" };
 
@@ -30,21 +32,17 @@ export default async function MessagesPage() {
 
   return (
     <div className="mx-auto w-full max-w-2xl px-4 py-8">
-      <h1 className="text-3xl font-bold tracking-tight">Mesajlar</h1>
-      <p className="mt-1 text-muted-foreground">
-        Eşleştiğin ev sahibi/arayanlarla buradan iletişim kur.
-      </p>
+      <PageHeader title="Mesajlar" description="Eşleştiğin ev sahibi/arayanlarla buradan iletişim kur." />
 
       {conversations.length === 0 ? (
-        <div className="mt-8 flex flex-col items-center rounded-2xl border border-dashed border-border py-16 text-center">
-          <MessageCircle className="size-10 text-muted-foreground" />
-          <p className="mt-4 font-medium">Henüz mesajın yok</p>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Bir ilanda “İletişime geç” diyerek başlayabilirsin.
-          </p>
-        </div>
+        <EmptyState
+          className="mt-6"
+          icon={MessageCircle}
+          title="Henüz mesajın yok"
+          text="Bir ilanda “İletişime geç” diyerek başlayabilirsin."
+        />
       ) : (
-        <div className="mt-6 divide-y divide-border overflow-hidden rounded-2xl border border-border bg-card">
+        <div className="mt-6 divide-y divide-border overflow-hidden rounded-3xl bg-card shadow-[0_4px_20px_-6px_rgb(154_52_18/0.12)] ring-1 ring-foreground/[0.06]">
           {conversations.map((c) => (
             <Link
               key={c.id}

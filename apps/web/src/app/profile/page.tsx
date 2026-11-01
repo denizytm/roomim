@@ -12,6 +12,7 @@ import { isEffectivelyBanned } from "@/lib/ban";
 import { computeBadges } from "@/lib/loyalty";
 import { AVATAR_BUCKET, publicImageUrl } from "@/lib/supabase/storage";
 import { cn } from "@/lib/utils";
+import { PageHeader } from "@/components/layout/page-header";
 
 export const metadata = { title: "Profilim" };
 
@@ -59,10 +60,7 @@ export default async function ProfilePage() {
 
   return (
     <div className="mx-auto w-full max-w-2xl px-4 py-10">
-      <h1 className="text-3xl font-bold tracking-tight">Profilim</h1>
-      <p className="mt-1 text-muted-foreground">
-        Profilini güncel tut — eşleşme şansını artırır.
-      </p>
+      <PageHeader title="Profilim" description="Profilini güncel tut — eşleşme şansını artırır." />
 
       {/* Puan & Rozetler */}
       <div className="mt-8 grid gap-4 sm:grid-cols-[auto_1fr]">

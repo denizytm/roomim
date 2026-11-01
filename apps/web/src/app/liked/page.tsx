@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button";
 import { ListingCard } from "@/features/listings/listing-card";
 import { getLikedListings } from "@/features/listings/queries";
 import { requireOnboardedProfile } from "@/lib/auth";
+import { EmptyState } from "@/components/empty-state";
+import { PageHeader } from "@/components/layout/page-header";
 
 export const metadata = { title: "Beğendiklerim" };
 
@@ -15,22 +17,20 @@ export default async function LikedPage() {
 
   return (
     <div className="mx-auto w-full max-w-6xl px-4 py-8">
-      <h1 className="text-3xl font-bold tracking-tight">Beğendiklerim</h1>
-      <p className="mt-1 text-muted-foreground">
-        İletişim kurduğun ilanları burada tekrar bulabilirsin.
-      </p>
+      <PageHeader title="Beğendiklerim" description="İletişim kurduğun ilanları burada tekrar bulabilirsin." />
 
       {listings.length === 0 ? (
-        <div className="mt-8 flex flex-col items-center justify-center rounded-2xl border border-dashed border-border py-20 text-center">
-          <HeartOff className="size-10 text-muted-foreground" />
-          <p className="mt-4 font-medium">Henüz bir ilan beğenmedin</p>
-          <p className="mt-1 text-sm text-muted-foreground">
-            İlanları keşfet, ilgilendiklerinle iletişim kur — burada birikirler.
-          </p>
-          <Button className="mt-5" render={<Link href="/listings" />}>
-            İlanları keşfet
-          </Button>
-        </div>
+        <EmptyState
+          className="mt-6"
+          icon={HeartOff}
+          title="Henüz bir ilan beğenmedin"
+          text="İlanları keşfet, ilgilendiklerinle iletişim kur — burada birikirler."
+          action={
+            <Button size="lg" render={<Link href="/listings" />}>
+              İlanları keşfet
+            </Button>
+          }
+        />
       ) : (
         <div className="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {listings.map((listing, i) => (

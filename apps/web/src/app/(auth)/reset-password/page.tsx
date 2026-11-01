@@ -61,7 +61,7 @@ export default function ResetPasswordPage() {
 
   if (done) {
     return (
-      <Card className="text-center">
+      <Card className="text-center [--card-spacing:--spacing(6)]">
         <CardHeader>
           <span className="mx-auto grid size-14 place-items-center rounded-2xl bg-primary/10 text-primary">
             <CheckCircle2 className="size-7" />
@@ -84,7 +84,7 @@ export default function ResetPasswordPage() {
 
   if (ready && !hasSession) {
     return (
-      <Card className="text-center">
+      <Card className="text-center [--card-spacing:--spacing(6)]">
         <CardHeader>
           <CardTitle className="text-2xl">Bağlantı geçersiz</CardTitle>
           <CardDescription>
@@ -101,7 +101,7 @@ export default function ResetPasswordPage() {
   }
 
   return (
-    <Card>
+    <Card className="[--card-spacing:--spacing(6)]">
       <CardHeader>
         <CardTitle className="text-2xl">Yeni şifre belirle</CardTitle>
         <CardDescription>Hesabın için yeni bir şifre gir.</CardDescription>

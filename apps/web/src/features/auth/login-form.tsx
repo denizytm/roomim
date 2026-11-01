@@ -28,10 +28,10 @@ export function LoginForm({ redirectTo }: { redirectTo?: string }) {
   }
 
   return (
-    <Card>
+    <Card className="[--card-spacing:--spacing(6)]">
       <CardHeader>
-        <CardTitle className="text-2xl">Giriş yap</CardTitle>
-        <CardDescription>Hesabına giriş yaparak devam et.</CardDescription>
+        <CardTitle className="text-2xl font-bold">Tekrar hoş geldin 👋</CardTitle>
+        <CardDescription className="text-[0.95rem]">Üniversite e-postanla giriş yap.</CardDescription>
       </CardHeader>
 
       <form action={formAction}>
@@ -118,7 +118,7 @@ function VerifyNotice({ email }: { email: string }) {
   }
 
   return (
-    <Card className="text-center">
+    <Card className="text-center [--card-spacing:--spacing(6)]">
       <CardHeader>
         <span className="mx-auto grid size-14 place-items-center rounded-2xl bg-amber-500/10 text-amber-600">
           <MailWarning className="size-7" />

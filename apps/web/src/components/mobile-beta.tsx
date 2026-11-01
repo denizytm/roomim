@@ -2,38 +2,40 @@ import { Apple, Play } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
+// iOS henüz App Store'da listelenmediği için TestFlight; Android Play Store'da yayında.
 export const IOS_TESTFLIGHT = "https://testflight.apple.com/join/xd1FbzJU";
-export const ANDROID_TESTING = "https://play.google.com/apps/testing/com.hcdijital.roomim";
+export const ANDROID_STORE = "https://play.google.com/store/apps/details?id=com.hcdijital.roomim";
 
-// iOS (TestFlight) + Android (Play beta) test bağlantıları.
-export function MobileBetaLinks({
+// Mağaza rozeti görünümünde indirme bağlantıları.
+export function MobileAppLinks({
   className,
   size = "default",
 }: {
   className?: string;
   size?: "default" | "sm";
 }) {
-  const base =
-    "inline-flex items-center justify-center gap-2 rounded-xl bg-foreground font-medium text-background transition-opacity hover:opacity-90";
-  const dims = size === "sm" ? "px-3 py-2 text-xs" : "px-5 py-3 text-sm";
+  const sm = size === "sm";
+  const base = cn(
+    "inline-flex items-center gap-2.5 rounded-xl bg-foreground text-background transition-transform hover:-translate-y-0.5",
+    sm ? "px-3 py-1.5" : "px-4 py-2.5",
+  );
+  const icon = sm ? "size-4" : "size-6";
 
   return (
-    <div className={cn("flex flex-col gap-3 sm:flex-row", className)}>
-      <a
-        href={IOS_TESTFLIGHT}
-        target="_blank"
-        rel="noopener noreferrer"
-        className={cn(base, dims)}
-      >
-        <Apple className={size === "sm" ? "size-4" : "size-5"} /> iOS · TestFlight
+    <div className={cn("flex flex-wrap gap-3", className)}>
+      <a href={ANDROID_STORE} target="_blank" rel="noopener noreferrer" className={base}>
+        <Play className={cn(icon, "fill-current")} />
+        <span className="flex flex-col text-left leading-tight">
+          <span className={cn("opacity-75", sm ? "text-[9px]" : "text-[11px]")}>Hemen indir</span>
+          <span className={cn("font-semibold", sm ? "text-xs" : "text-[15px]")}>Google Play</span>
+        </span>
       </a>
-      <a
-        href={ANDROID_TESTING}
-        target="_blank"
-        rel="noopener noreferrer"
-        className={cn(base, dims)}
-      >
-        <Play className={size === "sm" ? "size-4" : "size-5"} /> Android · Play testi
+      <a href={IOS_TESTFLIGHT} target="_blank" rel="noopener noreferrer" className={base}>
+        <Apple className={cn(icon, "fill-current")} />
+        <span className="flex flex-col text-left leading-tight">
+          <span className={cn("opacity-75", sm ? "text-[9px]" : "text-[11px]")}>iOS beta</span>
+          <span className={cn("font-semibold", sm ? "text-xs" : "text-[15px]")}>TestFlight</span>
+        </span>
       </a>
     </div>
   );

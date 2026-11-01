@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { AlarmClock, Plus } from "lucide-react";
+import { AlarmClock, Home, Plus } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -12,6 +12,8 @@ import type { ListingStatus } from "@/lib/types/database.types";
 import { daysLeft, formatRent } from "@/lib/format";
 import { LISTING_BUCKET, publicImageUrl } from "@/lib/supabase/storage";
 import { cn } from "@/lib/utils";
+import { EmptyState } from "@/components/empty-state";
+import { PageHeader } from "@/components/layout/page-header";
 
 const STATUS_LABEL: Record<ListingStatus, string> = {
   active: "Yayında",
@@ -47,20 +49,23 @@ export default async function MyListingsPage() {
 
   return (
     <div className="mx-auto w-full max-w-4xl px-4 py-8">
-      <div className="flex items-center justify-between gap-3">
-        <h1 className="text-3xl font-bold tracking-tight">İlanlarım</h1>
-        <Button render={<Link href="/listings/new" />}>
-          <Plus /> İlan ver
-        </Button>
-      </div>
+      <PageHeader
+        title="İlanlarım"
+        description="İlanlarını yönet, süresini uzat veya kapat."
+        action={
+          <Button size="lg" className="bg-white text-primary shadow-none hover:bg-white/90" render={<Link href="/listings/new" />}>
+            <Plus /> İlan ver
+          </Button>
+        }
+      />
 
       {listings.length === 0 ? (
-        <div className="mt-8 rounded-2xl border border-dashed border-border py-16 text-center">
-          <p className="font-medium">Henüz ilanın yok</p>
-          <p className="mt-1 text-sm text-muted-foreground">
-            İlk ilanını oluştur ve uyumlu bir ev arkadaşı bul.
-          </p>
-        </div>
+        <EmptyState
+          className="mt-6"
+          icon={Home}
+          title="Henüz ilanın yok"
+          text="İlk ilanını oluştur ve uyumlu bir ev arkadaşı bul."
+        />
       ) : (
         <div className="mt-6 space-y-4">
           {listings.map((listing) => {

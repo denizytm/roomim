@@ -101,7 +101,7 @@ export default function RegisterPage() {
   // "E-postanı kontrol et" ekranı — form değerleri state'te korunuyor.
   if (sent) {
     return (
-      <Card className="text-center">
+      <Card className="text-center [--card-spacing:--spacing(6)]">
         <CardHeader>
           <span className="mx-auto grid size-14 place-items-center rounded-2xl bg-primary/10 text-primary">
             <MailCheck className="size-7" />
@@ -142,7 +142,7 @@ export default function RegisterPage() {
 
   return (
     <>
-      <Card>
+      <Card className="[--card-spacing:--spacing(6)]">
       <CardHeader>
         <CardTitle className="text-2xl">Kayıt ol</CardTitle>
         <CardDescription>

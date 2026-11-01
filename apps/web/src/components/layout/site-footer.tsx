@@ -1,7 +1,7 @@
 import Link from "next/link";
 
 import { Logo } from "@/components/layout/logo";
-import { MobileBetaLinks } from "@/components/mobile-beta";
+import { MobileAppLinks } from "@/components/mobile-beta";
 
 export function SiteFooter() {
   return (
@@ -14,10 +14,8 @@ export function SiteFooter() {
             doğrulanmış topluluk.
           </p>
           <div>
-            <p className="mb-2 text-xs font-medium text-foreground">
-              📱 Mobil uygulama beta testte — dene:
-            </p>
-            <MobileBetaLinks size="sm" />
+            <p className="mb-2 text-xs font-medium text-foreground">📱 Mobil uygulamayı indir:</p>
+            <MobileAppLinks size="sm" />
           </div>
         </div>
         <div className="flex flex-col gap-2 sm:items-end">
