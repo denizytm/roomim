@@ -1,3 +1,4 @@
+import { Ionicons } from "@expo/vector-icons";
 import { Link, router } from "expo-router";
 import { useState } from "react";
 import {
@@ -51,14 +52,28 @@ export default function ForgotPassword() {
         <ScrollView
           contentContainerStyle={{ padding: 24, gap: 16, flexGrow: 1, justifyContent: "center" }}
         >
-          <Text style={{ fontSize: 26, fontWeight: "800", color: colors.text }}>
-            Şifreni sıfırla
-          </Text>
-          <Text style={{ fontSize: 14, color: colors.muted, marginTop: -8 }}>
-            Hesabının e-posta adresini gir; sana bir sıfırlama bağlantısı gönderelim.
-          </Text>
+          <View style={{ alignItems: "center", marginBottom: 8 }}>
+            <View
+              style={{
+                width: 72,
+                height: 72,
+                borderRadius: 36,
+                backgroundColor: colors.surface,
+                alignItems: "center",
+                justifyContent: "center",
+                marginBottom: 16,
+              }}
+            >
+              <Ionicons name="key-outline" size={32} color={colors.primary} />
+            </View>
+            <Text style={{ fontSize: 28, fontWeight: "800", color: colors.text }}>Şifreni sıfırla</Text>
+            <Text style={{ fontSize: 15, lineHeight: 21, color: colors.muted, marginTop: 6, textAlign: "center" }}>
+              Hesabının e-posta adresini gir; sana bir sıfırlama bağlantısı gönderelim.
+            </Text>
+          </View>
 
           <Field
+            icon="mail-outline"
             label="E-posta"
             value={email}
             onChangeText={setEmail}
@@ -70,9 +85,9 @@ export default function ForgotPassword() {
 
           <Btn title="Sıfırlama bağlantısı gönder" onPress={submit} loading={loading} />
 
-          <View style={{ flexDirection: "row", justifyContent: "center", gap: 6, marginTop: 4 }}>
-            <Text style={{ color: colors.muted }}>Şifreni hatırladın mı?</Text>
-            <Link href="/sign-in" style={{ color: colors.primary, fontWeight: "700" }}>
+          <View style={{ flexDirection: "row", justifyContent: "center", gap: 4, marginTop: 4 }}>
+            <Text style={{ color: colors.muted, fontSize: 15 }}>Şifreni hatırladın mı?</Text>
+            <Link href="/sign-in" style={{ color: colors.primary, fontWeight: "700", fontSize: 15 }}>
               Giriş yap
             </Link>
           </View>

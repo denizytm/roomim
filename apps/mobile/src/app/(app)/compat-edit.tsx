@@ -41,6 +41,7 @@ export default function CompatEdit() {
       initial={data.initial}
       submitLabel="Kaydet"
       warnIncomplete={false}
+      hasHeader
       onSubmit={async (answers) => {
         if (!session) return;
         await saveAnswers(session.user.id, answers);

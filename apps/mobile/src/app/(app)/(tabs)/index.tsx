@@ -1,7 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import { router, type Href } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
-import { ActivityIndicator, Pressable, Text, View } from "react-native";
+import { ActivityIndicator, Image, Pressable, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { SwipeDeck } from "@/components/swipe-deck";
@@ -42,12 +42,31 @@ export default function DeckScreen() {
           alignItems: "center",
           justifyContent: "space-between",
           paddingHorizontal: 20,
-          paddingVertical: 12,
+          paddingTop: 8,
+          paddingBottom: 4,
         }}
       >
-        <Text style={{ fontSize: 22, fontWeight: "800", color: colors.primary }}>Roomim</Text>
-        <Pressable onPress={() => router.push("/search" as Href)} hitSlop={8}>
-          <Ionicons name="search-outline" size={24} color={colors.text} />
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+          <Image source={require("../../../../assets/images/icon.png")} style={{ width: 32, height: 32, borderRadius: 9 }} />
+          <Text style={{ fontSize: 24, fontWeight: "900", color: colors.primary, letterSpacing: -0.8 }}>
+            roomim<Text style={{ color: colors.text }}>.</Text>
+          </Text>
+        </View>
+        <Pressable
+          onPress={() => router.push("/search" as Href)}
+          hitSlop={8}
+          style={({ pressed }) => ({
+            width: 42,
+            height: 42,
+            borderRadius: 21,
+            backgroundColor: colors.field,
+            alignItems: "center",
+            justifyContent: "center",
+            opacity: pressed ? 0.7 : 1,
+          })}
+          accessibilityLabel="İlan ara"
+        >
+          <Ionicons name="search" size={20} color={colors.text} />
         </Pressable>
       </View>
       {cards === null ? (

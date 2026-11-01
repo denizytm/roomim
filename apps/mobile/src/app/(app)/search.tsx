@@ -6,11 +6,11 @@ import {
   Pressable,
   ScrollView,
   Text,
-  TextInput,
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+import { Btn, Field } from "@/components/form";
 import { ListingCard } from "@/components/listing-card";
 import { searchListings, type ListingCard as ListingCardData } from "@/lib/queries";
 import { colors } from "@/lib/theme";
@@ -28,12 +28,10 @@ function Chip({
     <Pressable
       onPress={onPress}
       style={{
-        paddingHorizontal: 14,
-        paddingVertical: 8,
+        paddingHorizontal: 16,
+        paddingVertical: 10,
         borderRadius: 999,
-        borderWidth: 1,
-        borderColor: active ? colors.primary : colors.border,
-        backgroundColor: active ? colors.primary : "#fff",
+        backgroundColor: active ? colors.primary : colors.field,
       }}
     >
       <Text style={{ color: active ? "#fff" : colors.text, fontWeight: "600", fontSize: 13 }}>
@@ -115,25 +113,21 @@ export default function SearchScreen() {
 
             <View style={{ flexDirection: "row", gap: 10 }}>
               <View style={{ flex: 1, gap: 6 }}>
-                <Text style={{ fontSize: 13, fontWeight: "700", color: colors.text }}>Min. kira ₺</Text>
-                <TextInput
+                <Field
+                  label="Min. kira ₺"
                   value={minRent}
                   onChangeText={(v) => setMinRent(v.replace(/\D/g, ""))}
                   keyboardType="numeric"
                   placeholder="0"
-                  placeholderTextColor={colors.muted}
-                  style={inputStyle}
                 />
               </View>
               <View style={{ flex: 1, gap: 6 }}>
-                <Text style={{ fontSize: 13, fontWeight: "700", color: colors.text }}>Maks. kira ₺</Text>
-                <TextInput
+                <Field
+                  label="Maks. kira ₺"
                   value={maxRent}
                   onChangeText={(v) => setMaxRent(v.replace(/\D/g, ""))}
                   keyboardType="numeric"
                   placeholder="∞"
-                  placeholderTextColor={colors.muted}
-                  style={inputStyle}
                 />
               </View>
             </View>
@@ -150,12 +144,9 @@ export default function SearchScreen() {
               <Chip label="🐾 Evcil hayvan" active={pets} onPress={() => setPets((p) => !p)} />
             </View>
 
-            <Pressable
-              onPress={run}
-              style={{ backgroundColor: colors.primary, borderRadius: 12, paddingVertical: 13, alignItems: "center", marginTop: 4 }}
-            >
-              <Text style={{ color: "#fff", fontWeight: "700", fontSize: 15 }}>Ara</Text>
-            </Pressable>
+            <View style={{ marginTop: 4 }}>
+              <Btn title="Ara" icon="search" onPress={run} />
+            </View>
 
             <Text style={{ color: colors.muted, fontSize: 12, marginTop: 2 }}>
               {loading ? "Aranıyor…" : `${results?.length ?? 0} ilan`}
@@ -176,14 +167,3 @@ export default function SearchScreen() {
     </SafeAreaView>
   );
 }
-
-const inputStyle = {
-  borderWidth: 1,
-  borderColor: colors.border,
-  borderRadius: 12,
-  paddingHorizontal: 14,
-  paddingVertical: 11,
-  fontSize: 15,
-  color: colors.text,
-  backgroundColor: "#fff",
-} as const;

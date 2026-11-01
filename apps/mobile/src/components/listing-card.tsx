@@ -14,22 +14,25 @@ export function ListingCard({ item }: { item: ListingCardData }) {
       style={{
         flexDirection: "row",
         gap: 12,
-        borderWidth: 1,
-        borderColor: colors.border,
-        borderRadius: 16,
-        overflow: "hidden",
+        borderRadius: 18,
+        padding: 8,
         backgroundColor: "#fff",
+        shadowColor: "#0F172A",
+        shadowOpacity: 0.06,
+        shadowRadius: 12,
+        shadowOffset: { width: 0, height: 4 },
+        elevation: 2,
       }}
     >
-      <View style={{ width: 104, height: 104, backgroundColor: colors.surface, alignItems: "center", justifyContent: "center" }}>
+      <View style={{ width: 96, height: 96, borderRadius: 12, overflow: "hidden", backgroundColor: colors.surface, alignItems: "center", justifyContent: "center" }}>
         {item.coverUrl ? (
-          <Image source={{ uri: item.coverUrl }} style={{ width: 104, height: 104 }} contentFit="cover" />
+          <Image source={{ uri: item.coverUrl }} style={{ width: 96, height: 96 }} contentFit="cover" />
         ) : (
           <Text style={{ fontSize: 28 }}>🏠</Text>
         )}
       </View>
       <View style={{ flex: 1, paddingVertical: 10, paddingRight: 12, gap: 4, justifyContent: "center" }}>
-        <Text style={{ fontWeight: "700", color: colors.text }} numberOfLines={1}>
+        <Text style={{ fontWeight: "700", fontSize: 15, color: colors.text }} numberOfLines={1}>
           {item.title}
         </Text>
         <Text style={{ color: colors.muted, fontSize: 13 }} numberOfLines={1}>
@@ -38,7 +41,9 @@ export function ListingCard({ item }: { item: ListingCardData }) {
         <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginTop: 2 }}>
           <Text style={{ color: colors.primary, fontWeight: "800" }}>{formatRent(item.monthly_rent)}/ay</Text>
           {item.score != null && (
-            <Text style={{ color: colors.primary, fontSize: 12, fontWeight: "700" }}>%{item.score} uyum</Text>
+            <View style={{ backgroundColor: colors.surface, borderRadius: 999, paddingHorizontal: 8, paddingVertical: 3 }}>
+              <Text style={{ color: colors.primary, fontSize: 12, fontWeight: "800" }}>%{item.score} uyum</Text>
+            </View>
           )}
         </View>
         <Text style={{ color: colors.muted, fontSize: 12 }}>

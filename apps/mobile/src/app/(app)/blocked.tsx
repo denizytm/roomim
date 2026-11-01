@@ -6,6 +6,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useSession } from "@/lib/auth-context";
 import { getBlockedUsers, unblockUser, type BlockedUser } from "@/lib/queries";
 import { publicImageUrl } from "@/lib/storage";
+import { EmptyState } from "@/components/empty-state";
 import { colors } from "@/lib/theme";
 import { useFocusEffect } from "expo-router";
 
@@ -51,9 +52,13 @@ export default function BlockedUsersScreen() {
         keyExtractor={(u) => u.id}
         contentContainerStyle={{ padding: 20, gap: 12 }}
         ListEmptyComponent={
-          <Text style={{ color: colors.muted, textAlign: "center", marginTop: 40 }}>
-            Engellediğin kimse yok.
-          </Text>
+          <View style={{ height: 420 }}>
+            <EmptyState
+              icon="shield-checkmark-outline"
+              title="Engellediğin kimse yok"
+              text="Bir kullanıcıyı engellediğinde burada görünür; istediğin zaman engeli kaldırabilirsin."
+            />
+          </View>
         }
         ListHeaderComponent={
           users.length > 0 ? (

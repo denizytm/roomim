@@ -19,6 +19,7 @@ import {
   Platform,
   Pressable,
   ScrollView,
+  StyleSheet,
   Text,
   TextInput,
   View,
@@ -39,7 +40,9 @@ import {
   type ChatMessage,
 } from "@/lib/queries";
 import { supabase } from "@/lib/supabase";
-import { colors } from "@/lib/theme";
+import { EmptyState } from "@/components/empty-state";
+import { Btn } from "@/components/form";
+import { colors, radius } from "@/lib/theme";
 
 const EMOJIS = [
   "😀","😁","😂","🤣","😊","😍","😘","😎","🤔","😅",
@@ -231,54 +234,56 @@ export default function ChatScreen() {
             ),
           }}
         />
-        <View style={{ flex: 1, alignItems: "center", justifyContent: "center", padding: 28, gap: 12 }}>
-          {detail.isHost ? (
-            <>
-              <Text style={{ fontSize: 17, fontWeight: "700", color: colors.text, textAlign: "center" }}>
+        {detail.isHost ? (
+          <>
+            <ScrollView contentContainerStyle={{ padding: 24, gap: 12, alignItems: "center" }}>
+              <View style={styles.stateIcon}>
+                <Ionicons name="person-add-outline" size={32} color={colors.primary} />
+              </View>
+              <Text style={{ fontSize: 20, fontWeight: "800", color: colors.text, textAlign: "center" }}>
                 {detail.otherName} ilanınla ilgileniyor
               </Text>
-              <Text style={{ color: colors.muted, textAlign: "center" }}>
+              <Text style={{ color: colors.muted, textAlign: "center", fontSize: 15 }}>
                 Onaylarsan mesajlaşma açılır.
               </Text>
               {detail.otherScore != null && (
-                <Text style={{ color: colors.primary, fontWeight: "800" }}>%{detail.otherScore} uyum</Text>
+                <View style={styles.scorePill}>
+                  <Ionicons name="sparkles" size={14} color="#fff" />
+                  <Text style={{ color: "#fff", fontWeight: "800" }}>%{detail.otherScore} uyum</Text>
+                </View>
               )}
-              <CompatPager answers={detail.otherAnswers} />
-              <View style={{ flexDirection: "row", gap: 12, marginTop: 8 }}>
-                <Pressable
-                  onPress={() => changeStatus("accepted")}
-                  disabled={busy}
-                  style={{ backgroundColor: colors.primary, paddingHorizontal: 22, paddingVertical: 12, borderRadius: 12 }}
-                >
-                  <Text style={{ color: "#fff", fontWeight: "700" }}>Onayla</Text>
-                </Pressable>
-                <Pressable
-                  onPress={() => changeStatus("declined")}
-                  disabled={busy}
-                  style={{ borderWidth: 1, borderColor: colors.border, paddingHorizontal: 22, paddingVertical: 12, borderRadius: 12 }}
-                >
-                  <Text style={{ color: colors.text, fontWeight: "700" }}>Reddet</Text>
-                </Pressable>
+              <View style={styles.compatCard}>
+                <CompatPager answers={detail.otherAnswers} />
               </View>
-            </>
-          ) : (
-            <>
-              <ActivityIndicator color={colors.primary} />
-              <Text style={{ fontWeight: "700", color: colors.text }}>İsteğin gönderildi</Text>
-              <Text style={{ color: colors.muted, textAlign: "center" }}>
-                {detail.otherName} onayladığında mesajlaşma açılır.
-              </Text>
-            </>
-          )}
-        </View>
+            </ScrollView>
+            <View style={styles.actionBar}>
+              <View style={{ flex: 1 }}>
+                <Btn title="Reddet" variant="outline" onPress={() => changeStatus("declined")} disabled={busy} />
+              </View>
+              <View style={{ flex: 1 }}>
+                <Btn title="Onayla" icon="checkmark" onPress={() => changeStatus("accepted")} disabled={busy} />
+              </View>
+            </View>
+          </>
+        ) : (
+          <View style={{ flex: 1, alignItems: "center", justifyContent: "center", padding: 32, gap: 8 }}>
+            <View style={styles.stateIcon}>
+              <Ionicons name="hourglass-outline" size={32} color={colors.primary} />
+            </View>
+            <Text style={{ fontSize: 18, fontWeight: "800", color: colors.text }}>İsteğin gönderildi</Text>
+            <Text style={{ color: colors.muted, textAlign: "center", fontSize: 15, lineHeight: 21 }}>
+              {detail.otherName} onayladığında mesajlaşma açılır.
+            </Text>
+          </View>
+        )}
       </SafeAreaView>
     );
   }
 
   if (detail.status === "declined") {
     return (
-      <View style={{ flex: 1, alignItems: "center", justifyContent: "center", backgroundColor: colors.bg, padding: 28 }}>
-        <Text style={{ color: colors.muted }}>Bu istek reddedildi.</Text>
+      <View style={{ flex: 1, backgroundColor: colors.bg }}>
+        <EmptyState icon="close-circle-outline" title="Bu istek reddedildi" />
       </View>
     );
   }
@@ -307,35 +312,33 @@ export default function ChatScreen() {
         keyboardVerticalOffset={90}
       >
         {/* Üst: ilgili ilan + (host) ilanı kapat + uyum profili */}
-        <View style={{ borderBottomColor: colors.border, borderBottomWidth: 1 }}>
+        <View style={{ padding: 12, gap: 8, borderBottomColor: colors.border, borderBottomWidth: StyleSheet.hairlineWidth }}>
           {detail.listingId && (
             <Pressable
               onPress={() => router.push(`/listing/${detail.listingId}` as Href)}
-              style={{
-                flexDirection: "row",
-                alignItems: "center",
-                gap: 8,
-                paddingHorizontal: 12,
-                paddingVertical: 10,
-                backgroundColor: colors.surface,
-              }}
+              style={({ pressed }) => [styles.listingBanner, pressed && { opacity: 0.8 }]}
             >
-              <Text style={{ fontSize: 16 }}>🏠</Text>
-              <Text style={{ flex: 1, color: colors.text, fontWeight: "600" }} numberOfLines={1}>
+              <View style={styles.bannerIcon}>
+                <Ionicons name="home" size={16} color={colors.primary} />
+              </View>
+              <Text style={{ flex: 1, color: colors.text, fontWeight: "600", fontSize: 14 }} numberOfLines={1}>
                 {detail.listingTitle ?? "İlan"}
               </Text>
-              <Text style={{ color: colors.primary, fontWeight: "700", fontSize: 13 }}>İlana git ›</Text>
+              <Ionicons name="chevron-forward" size={18} color={colors.placeholder} />
             </Pressable>
           )}
           {detail.isHost && detail.listingStatus !== "closed" && (
-            <Pressable onPress={close} disabled={busy} style={{ paddingHorizontal: 10, paddingBottom: 8 }}>
-              <Text style={{ color: colors.primary, fontWeight: "700", fontSize: 13 }}>
-                🎉 Anlaştıysanız ilanı kapat
-              </Text>
+            <Pressable
+              onPress={close}
+              disabled={busy}
+              style={({ pressed }) => [styles.closePill, pressed && { opacity: 0.8 }]}
+            >
+              <Ionicons name="checkmark-done" size={15} color="#059669" />
+              <Text style={{ color: "#059669", fontWeight: "700", fontSize: 13 }}>Anlaştıysanız ilanı kapat</Text>
             </Pressable>
           )}
           {showProfile && detail.otherAnswers.length > 0 && (
-            <View style={{ paddingHorizontal: 10, paddingBottom: 10 }}>
+            <View style={styles.compatCard}>
               {detail.otherScore != null && (
                 <Text style={{ color: colors.primary, fontWeight: "800", marginBottom: 4 }}>
                   %{detail.otherScore} uyum
@@ -350,23 +353,21 @@ export default function ChatScreen() {
           ref={listRef}
           data={messages}
           keyExtractor={(m) => m.id}
-          contentContainerStyle={{ padding: 12, gap: 8 }}
+          contentContainerStyle={{ padding: 16, gap: 6, flexGrow: 1 }}
           onContentSizeChange={() => listRef.current?.scrollToEnd({ animated: true })}
           ListEmptyComponent={
-            <Text style={{ textAlign: "center", color: colors.muted, marginTop: 24 }}>
-              Henüz mesaj yok. İlk mesajı sen gönder 👋
-            </Text>
+            <EmptyState icon="chatbubble-ellipses-outline" title="Henüz mesaj yok" text="İlk mesajı sen gönder 👋" />
           }
           renderItem={({ item }) => {
             const mine = item.sender_id === meId;
             const isImage = item.attachmentType === "image" && item.attachmentUrl;
             const isAudio = item.attachmentType === "audio" && item.attachmentUrl;
             return (
-              <View style={{ alignSelf: mine ? "flex-end" : "flex-start", maxWidth: "78%" }}>
+              <View style={{ alignSelf: mine ? "flex-end" : "flex-start", maxWidth: "80%" }}>
                 {isImage ? (
                   <Image
                     source={{ uri: item.attachmentUrl! }}
-                    style={{ width: 200, height: 200, borderRadius: 16 }}
+                    style={{ width: 220, height: 220, borderRadius: 20 }}
                     contentFit="cover"
                   />
                 ) : isAudio ? (
@@ -374,15 +375,15 @@ export default function ChatScreen() {
                 ) : (
                   <View
                     style={{
-                      backgroundColor: mine ? colors.primary : "#EFEFF2",
-                      borderRadius: 16,
-                      borderBottomRightRadius: mine ? 4 : 16,
-                      borderBottomLeftRadius: mine ? 16 : 4,
-                      paddingHorizontal: 14,
-                      paddingVertical: 9,
+                      backgroundColor: mine ? colors.primary : colors.field,
+                      borderRadius: 20,
+                      borderBottomRightRadius: mine ? 6 : 20,
+                      borderBottomLeftRadius: mine ? 20 : 6,
+                      paddingHorizontal: 15,
+                      paddingVertical: 10,
                     }}
                   >
-                    <Text style={{ color: mine ? "#fff" : colors.text, fontSize: 15 }}>{item.body}</Text>
+                    <Text style={{ color: mine ? "#fff" : colors.text, fontSize: 16, lineHeight: 21 }}>{item.body}</Text>
                   </View>
                 )}
               </View>
@@ -403,7 +404,7 @@ export default function ChatScreen() {
             showsHorizontalScrollIndicator={false}
             contentContainerStyle={{ gap: 6, paddingHorizontal: 12, paddingVertical: 8 }}
             keyboardShouldPersistTaps="handled"
-            style={{ borderTopColor: colors.border, borderTopWidth: 1 }}
+            style={{ borderTopColor: colors.border, borderTopWidth: StyleSheet.hairlineWidth }}
           >
             {EMOJIS.map((e) => (
               <Pressable key={e} onPress={() => setBody((b) => b + e)} hitSlop={4}>
@@ -417,10 +418,11 @@ export default function ChatScreen() {
           style={{
             flexDirection: "row",
             alignItems: "center",
-            gap: 6,
-            padding: 10,
+            gap: 4,
+            paddingHorizontal: 10,
+            paddingVertical: 8,
             borderTopColor: colors.border,
-            borderTopWidth: 1,
+            borderTopWidth: StyleSheet.hairlineWidth,
           }}
         >
           <Pressable onPress={() => setShowEmoji((s) => !s)} hitSlop={6} style={{ padding: 4 }}>
@@ -436,18 +438,18 @@ export default function ChatScreen() {
             value={body}
             onChangeText={setBody}
             placeholder={recording ? "Kaydediliyor…" : "Mesaj yaz…"}
-            placeholderTextColor={colors.muted}
+            placeholderTextColor={colors.placeholder}
             editable={!recording}
             onFocus={() => setShowEmoji(false)}
             style={{
               flex: 1,
-              borderWidth: 1,
-              borderColor: colors.border,
-              borderRadius: 20,
+              backgroundColor: colors.field,
+              borderRadius: 22,
               paddingHorizontal: 16,
-              paddingVertical: 10,
-              fontSize: 15,
+              paddingVertical: 11,
+              fontSize: 16,
               color: colors.text,
+              marginLeft: 4,
             }}
           />
           <Pressable
@@ -455,15 +457,16 @@ export default function ChatScreen() {
             disabled={sending || !body.trim()}
             style={{
               backgroundColor: colors.primary,
-              width: 44,
-              height: 44,
-              borderRadius: 22,
+              width: 42,
+              height: 42,
+              borderRadius: 21,
+              marginLeft: 4,
               alignItems: "center",
               justifyContent: "center",
-              opacity: sending || !body.trim() ? 0.5 : 1,
+              opacity: sending || !body.trim() ? 0.4 : 1,
             }}
           >
-            <Text style={{ color: "#fff", fontSize: 18 }}>➤</Text>
+            <Ionicons name="arrow-up" size={22} color="#fff" />
           </Pressable>
         </View>
       </KeyboardAvoidingView>
@@ -481,19 +484,19 @@ function ChatHeaderTitle({ id, name, avatar }: { id: string; name: string; avata
     >
       <View
         style={{
-          width: 30,
-          height: 30,
-          borderRadius: 15,
-          backgroundColor: colors.surface,
+          width: 32,
+          height: 32,
+          borderRadius: 16,
+          backgroundColor: colors.primary,
           alignItems: "center",
           justifyContent: "center",
           overflow: "hidden",
         }}
       >
         {uri ? (
-          <Image source={{ uri }} style={{ width: 30, height: 30 }} contentFit="cover" />
+          <Image source={{ uri }} style={{ width: 32, height: 32 }} contentFit="cover" />
         ) : (
-          <Text style={{ color: colors.primary, fontWeight: "800", fontSize: 13 }}>
+          <Text style={{ color: "#fff", fontWeight: "800", fontSize: 14 }}>
             {name.slice(0, 1).toUpperCase()}
           </Text>
         )}
@@ -528,10 +531,10 @@ function AudioBubble({ uri, mine }: { uri: string; mine: boolean }) {
         flexDirection: "row",
         alignItems: "center",
         gap: 10,
-        backgroundColor: mine ? colors.primary : "#EFEFF2",
-        borderRadius: 16,
-        borderBottomRightRadius: mine ? 4 : 16,
-        borderBottomLeftRadius: mine ? 16 : 4,
+        backgroundColor: mine ? colors.primary : colors.field,
+        borderRadius: 20,
+        borderBottomRightRadius: mine ? 6 : 20,
+        borderBottomLeftRadius: mine ? 20 : 6,
         paddingHorizontal: 14,
         paddingVertical: 10,
         minWidth: 140,
@@ -590,7 +593,7 @@ function CompatPager({ answers }: { answers: CompatAnswer[] }) {
               paddingHorizontal: 12,
               paddingVertical: 6,
               borderRadius: 999,
-              backgroundColor: i === page ? colors.primary : colors.surface,
+              backgroundColor: i === page ? colors.primary : "#fff",
             }}
           >
             <Text style={{ color: i === page ? "#fff" : colors.text, fontWeight: "700", fontSize: 12 }}>
@@ -644,3 +647,65 @@ function CompatPager({ answers }: { answers: CompatAnswer[] }) {
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  stateIcon: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: colors.surface,
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 8,
+  },
+  scorePill: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+    borderRadius: 999,
+    backgroundColor: colors.primary,
+  },
+  compatCard: {
+    alignSelf: "stretch",
+    padding: 14,
+    borderRadius: radius.lg,
+    backgroundColor: colors.field,
+  },
+  actionBar: {
+    flexDirection: "row",
+    gap: 12,
+    paddingHorizontal: 20,
+    paddingTop: 12,
+    paddingBottom: 8,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: colors.border,
+  },
+  listingBanner: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    padding: 10,
+    borderRadius: radius.md,
+    backgroundColor: colors.field,
+  },
+  bannerIcon: {
+    width: 32,
+    height: 32,
+    borderRadius: 10,
+    backgroundColor: colors.surface,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  closePill: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    alignSelf: "flex-start",
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+    borderRadius: 999,
+    backgroundColor: "#ECFDF5",
+  },
+});

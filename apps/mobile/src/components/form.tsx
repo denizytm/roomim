@@ -1,3 +1,5 @@
+import { Ionicons } from "@expo/vector-icons";
+import { useState, type ReactNode } from "react";
 import {
   ActivityIndicator,
   Pressable,
@@ -7,26 +9,68 @@ import {
   type TextInputProps,
 } from "react-native";
 
-import { colors } from "@/lib/theme";
+import { colors, radius } from "@/lib/theme";
 
-export function Field({ label, ...props }: { label: string } & TextInputProps) {
+type IconName = keyof typeof Ionicons.glyphMap;
+
+// Dolgulu input — odaklanınca turuncu çerçeve. Opsiyonel etiket, sol ikon ve sağ öğe.
+export function Field({
+  label,
+  icon,
+  right,
+  error,
+  style,
+  onFocus,
+  onBlur,
+  ...props
+}: { label?: string; icon?: IconName; right?: ReactNode; error?: string } & TextInputProps) {
+  const [focused, setFocused] = useState(false);
   return (
-    <View style={{ gap: 6 }}>
-      <Text style={{ fontSize: 13, fontWeight: "600", color: colors.text }}>{label}</Text>
-      <TextInput
-        placeholderTextColor={colors.muted}
+    <View style={{ gap: 8 }}>
+      {label && (
+        <Text style={{ fontSize: 14, fontWeight: "600", color: error ? colors.danger : colors.text }}>{label}</Text>
+      )}
+      <View
         style={{
-          borderWidth: 1,
-          borderColor: colors.border,
-          borderRadius: 12,
-          paddingHorizontal: 14,
-          paddingVertical: 12,
-          fontSize: 16,
-          color: colors.text,
-          backgroundColor: "#fff",
+          flexDirection: "row",
+          alignItems: props.multiline ? "flex-start" : "center",
+          gap: 12,
+          minHeight: 54,
+          paddingHorizontal: 16,
+          borderRadius: radius.md,
+          borderWidth: 1.5,
+          borderColor: error ? colors.danger : focused ? colors.primary : "transparent",
+          backgroundColor: focused ? "#fff" : colors.field,
         }}
-        {...props}
-      />
+      >
+        {icon && (
+          <Ionicons
+            name={icon}
+            size={20}
+            color={focused ? colors.primary : colors.muted}
+            style={props.multiline ? { marginTop: 15 } : undefined}
+          />
+        )}
+        <TextInput
+          placeholderTextColor={colors.placeholder}
+          onFocus={(e) => {
+            setFocused(true);
+            onFocus?.(e);
+          }}
+          onBlur={(e) => {
+            setFocused(false);
+            onBlur?.(e);
+          }}
+          style={[
+            { flex: 1, fontSize: 16, color: colors.text, paddingVertical: 15 },
+            props.multiline && { textAlignVertical: "top" },
+            style,
+          ]}
+          {...props}
+        />
+        {right}
+      </View>
+      {error ? <Text style={{ color: colors.danger, fontSize: 13 }}>{error}</Text> : null}
     </View>
   );
 }
@@ -36,36 +80,48 @@ export function Btn({
   onPress,
   loading,
   disabled,
+  icon,
   variant = "primary",
 }: {
   title: string;
   onPress: () => void;
   loading?: boolean;
   disabled?: boolean;
-  variant?: "primary" | "outline";
+  icon?: IconName;
+  variant?: "primary" | "outline" | "danger";
 }) {
   const isPrimary = variant === "primary";
+  const fg = isPrimary ? "#fff" : variant === "danger" ? colors.danger : colors.text;
   return (
     <Pressable
       onPress={onPress}
       disabled={disabled || loading}
       style={({ pressed }) => ({
-        borderRadius: 12,
-        paddingVertical: 14,
+        flexDirection: "row",
+        gap: 8,
+        minHeight: 54,
+        borderRadius: radius.md,
+        paddingHorizontal: 16,
         alignItems: "center",
         justifyContent: "center",
         opacity: disabled || loading ? 0.6 : pressed ? 0.85 : 1,
-        backgroundColor: isPrimary ? colors.primary : "transparent",
-        borderWidth: isPrimary ? 0 : 1,
-        borderColor: colors.border,
+        backgroundColor: isPrimary ? colors.primary : variant === "danger" ? "#FEF2F2" : colors.field,
+        ...(isPrimary && {
+          shadowColor: colors.primary,
+          shadowOpacity: 0.25,
+          shadowRadius: 10,
+          shadowOffset: { width: 0, height: 4 },
+          elevation: 3,
+        }),
       })}
     >
       {loading ? (
         <ActivityIndicator color={isPrimary ? "#fff" : colors.primary} />
       ) : (
-        <Text style={{ color: isPrimary ? "#fff" : colors.text, fontWeight: "700", fontSize: 16 }}>
-          {title}
-        </Text>
+        <>
+          {icon && <Ionicons name={icon} size={18} color={fg} />}
+          <Text style={{ color: fg, fontWeight: "700", fontSize: 16 }}>{title}</Text>
+        </>
       )}
     </Pressable>
   );

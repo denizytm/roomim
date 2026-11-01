@@ -4,6 +4,7 @@ import { Link, router } from "expo-router";
 import { useState } from "react";
 import {
   Alert,
+  Image,
   KeyboardAvoidingView,
   Linking,
   Platform,
@@ -92,13 +93,17 @@ export default function SignUp() {
         style={{ flex: 1 }}
       >
         <ScrollView contentContainerStyle={{ padding: 24, gap: 16, flexGrow: 1, justifyContent: "center" }}>
-          <Text style={{ fontSize: 26, fontWeight: "800", color: colors.text }}>Kayıt ol</Text>
-          <Text style={{ fontSize: 14, color: colors.muted, marginTop: -8 }}>
-            Üniversite (edu) e-postanla Roomim topluluğuna katıl.
-          </Text>
+          <View style={{ alignItems: "center", marginBottom: 8 }}>
+            <Image source={require("../../assets/images/icon.png")} style={{ width: 56, height: 56, borderRadius: 16, marginBottom: 14 }} />
+            <Text style={{ fontSize: 28, fontWeight: "800", color: colors.text }}>Hesap oluştur</Text>
+            <Text style={{ fontSize: 15, color: colors.muted, marginTop: 4, textAlign: "center" }}>
+              Üniversite e-postanla Roomim topluluğuna katıl.
+            </Text>
+          </View>
 
-          <Field label="Ad Soyad" value={fullName} onChangeText={setFullName} placeholder="Deniz Yılmaz" />
+          <Field icon="person-outline" label="Ad Soyad" value={fullName} onChangeText={setFullName} placeholder="Deniz Yılmaz" />
           <Field
+            icon="mail-outline"
             label="Üniversite e-postası"
             value={email}
             onChangeText={setEmail}
@@ -108,6 +113,7 @@ export default function SignUp() {
             keyboardType="email-address"
           />
           <Field
+            icon="lock-closed-outline"
             label="Şifre"
             value={password}
             onChangeText={setPassword}
@@ -115,6 +121,7 @@ export default function SignUp() {
             secureTextEntry
           />
           <Field
+            icon="lock-closed-outline"
             label="Şifre (tekrar)"
             value={password2}
             onChangeText={setPassword2}
@@ -164,9 +171,9 @@ export default function SignUp() {
 
           <Btn title="Onay maili gönder" onPress={submit} loading={loading} />
 
-          <View style={{ flexDirection: "row", justifyContent: "center", gap: 6 }}>
-            <Text style={{ color: colors.muted }}>Zaten hesabın var mı?</Text>
-            <Link href="/sign-in" style={{ color: colors.primary, fontWeight: "700" }}>
+          <View style={{ flexDirection: "row", justifyContent: "center", gap: 4, marginTop: 4 }}>
+            <Text style={{ color: colors.muted, fontSize: 15 }}>Zaten hesabın var mı?</Text>
+            <Link href="/sign-in" style={{ color: colors.primary, fontWeight: "700", fontSize: 15 }}>
               Giriş yap
             </Link>
           </View>
@@ -180,9 +187,9 @@ function CheckBox({ active }: { active: boolean }) {
   return (
     <View
       style={{
-        width: 20,
-        height: 20,
-        borderRadius: 5,
+        width: 22,
+        height: 22,
+        borderRadius: 7,
         borderWidth: 2,
         borderColor: active ? colors.primary : colors.border,
         backgroundColor: active ? colors.primary : "transparent",
