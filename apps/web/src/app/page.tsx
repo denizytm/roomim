@@ -181,8 +181,8 @@ export default async function HomePage() {
                 Roomim artık cebinde
               </h2>
               <p className="mt-3 max-w-lg text-muted-foreground">
-                İlanları kaydırarak keşfet, eşleşince anında bildirim al. Android&apos;de Google
-                Play&apos;de, iOS&apos;ta TestFlight beta ile.
+                İlanları kaydırarak keşfet, eşleşince anında bildirim al. App Store ve Google
+                Play&apos;de ücretsiz.
               </p>
             </div>
             <MobileAppLinks className="justify-center md:flex-col" />

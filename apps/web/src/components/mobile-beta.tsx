@@ -2,8 +2,7 @@ import { Apple, Play } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
-// iOS henüz App Store'da listelenmediği için TestFlight; Android Play Store'da yayında.
-export const IOS_TESTFLIGHT = "https://testflight.apple.com/join/xd1FbzJU";
+export const IOS_STORE = "https://apps.apple.com/tr/app/roomim/id6795069317";
 export const ANDROID_STORE = "https://play.google.com/store/apps/details?id=com.hcdijital.roomim";
 
 // Mağaza rozeti görünümünde indirme bağlantıları.
@@ -30,11 +29,11 @@ export function MobileAppLinks({
           <span className={cn("font-semibold", sm ? "text-xs" : "text-[15px]")}>Google Play</span>
         </span>
       </a>
-      <a href={IOS_TESTFLIGHT} target="_blank" rel="noopener noreferrer" className={base}>
+      <a href={IOS_STORE} target="_blank" rel="noopener noreferrer" className={base}>
         <Apple className={cn(icon, "fill-current")} />
         <span className="flex flex-col text-left leading-tight">
-          <span className={cn("opacity-75", sm ? "text-[9px]" : "text-[11px]")}>iOS beta</span>
-          <span className={cn("font-semibold", sm ? "text-xs" : "text-[15px]")}>TestFlight</span>
+          <span className={cn("opacity-75", sm ? "text-[9px]" : "text-[11px]")}>Hemen indir</span>
+          <span className={cn("font-semibold", sm ? "text-xs" : "text-[15px]")}>App Store</span>
         </span>
       </a>
     </div>
